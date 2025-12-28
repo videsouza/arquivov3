@@ -18,7 +18,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -34,20 +34,15 @@
                 </div>
 
                 <nav class="mt-8 px-4 space-y-2">
-                    <button onclick="showTab('dashboard')" id="btn-dashboard" class="w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-amber-500 bg-slate-800 text-white shadow-lg group flex items-center gap-3">
+                    <button class="w-full text-left px-4 py-3 rounded border-l-4 border-amber-500 bg-slate-800 text-white shadow-lg flex items-center gap-3">
                         <i class="fa-solid fa-grid-2 w-5 text-amber-500"></i> 
                         <span class="font-medium text-sm tracking-wide">Ferramentas</span>
                     </button>
                     
-                    <button onclick="showTab('externos')" id="btn-externos" class="w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800 group flex items-center gap-3">
-                        <i class="fa-solid fa-cloud w-5"></i> 
-                        <span class="font-medium text-sm tracking-wide">Sistemas Web</span>
+                    <button class="w-full text-left px-4 py-3 rounded border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-3">
+                         <i class="fa-regular fa-circle-question w-5"></i>
+                        <span class="font-medium text-sm tracking-wide">Suporte</span>
                     </button>
-                    
-                    <div class="pt-4 mt-4 border-t border-slate-800">
-                        <p class="px-4 text-[10px] text-slate-500 uppercase tracking-widest mb-2">Suporte</p>
-                        <a href="#" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition"><i class="fa-regular fa-circle-question mr-2"></i> Ajuda</a>
-                    </div>
                 </nav>
             </div>
 
@@ -63,13 +58,13 @@
         </aside>
 
         <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around p-4 z-50 border-t border-slate-800">
-            <button onclick="showTab('dashboard')" class="flex flex-col items-center gap-1">
+            <button class="flex flex-col items-center gap-1 text-amber-500">
                 <i class="fa-solid fa-grid-2 text-xl mb-1"></i>
-                <span class="text-[10px]">Início</span>
+                <span class="text-[10px]">Ferramentas</span>
             </button>
-            <button onclick="showTab('externos')" class="flex flex-col items-center gap-1 text-slate-400">
-                <i class="fa-solid fa-cloud text-xl mb-1"></i>
-                <span class="text-[10px]">Web</span>
+             <button class="flex flex-col items-center gap-1 text-slate-400">
+                <i class="fa-regular fa-circle-question text-xl mb-1"></i>
+                <span class="text-[10px]">Ajuda</span>
             </button>
         </div>
 
@@ -77,169 +72,108 @@
             
             <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center shadow-sm z-10">
                 <div>
-                    <h2 id="page-title" class="text-2xl font-serif text-slate-800">Visão Geral</h2>
-                    <p id="page-subtitle" class="text-xs text-slate-500 font-sans mt-1">Selecione uma ferramenta para começar.</p>
+                    <h2 class="text-2xl font-serif text-slate-800">Ferramentas</h2>
+                    <p class="text-xs text-slate-500 font-sans mt-1">Acesso rápido a todos os módulos do sistema.</p>
                 </div>
                 <div class="md:hidden text-amber-500 font-serif font-bold text-xl">Hub.Doc</div>
             </header>
 
             <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth">
                 
-                <div id="tab-dashboard" class="aba-conteudo space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Módulos</p>
-                            <p class="text-2xl font-serif text-slate-800 mt-1">06</p>
+                    <a href="super-analista.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                                <i class="fas fa-chart-pie text-lg"></i>
+                            </div>
+                            <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Essencial</span>
                         </div>
-                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Status</p>
-                            <p class="text-2xl font-serif text-emerald-600 mt-1">Ativo</p>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Análise de Dados</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Dashboard analítico com insights automáticos gerados a partir de planilhas.</p>
+                        <div class="flex items-center text-xs font-bold text-blue-600 uppercase tracking-wide mt-auto">
+                            Acessar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
                         </div>
-                    </div>
+                    </a>
 
-                    <h3 class="font-serif text-lg text-slate-700 mb-4 border-b border-slate-200 pb-2">Ferramentas de Processamento</h3>
+                    <a href="otimizador-eliminacao.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-600"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition">
+                                <i class="fas fa-layer-group text-lg"></i>
+                            </div>
+                            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Novo</span>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Otimizador de Lotes</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Algoritmo para maximizar o número de caixas em blocos de eliminação.</p>
+                        <div class="flex items-center text-xs font-bold text-emerald-600 uppercase tracking-wide mt-auto">
+                            Otimizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </a>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        
-                        <a href="super-analista.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
-                                    <i class="fas fa-chart-pie text-lg"></i>
-                                </div>
-                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Essencial</span>
+                    <a href="etiqueta-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-slate-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800 group-hover:bg-slate-800 group-hover:text-white transition">
+                                <i class="fas fa-print text-lg"></i>
                             </div>
-                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Análise de Dados</h4>
-                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Dashboard analítico com insights automáticos gerados a partir de planilhas.</p>
-                            <div class="flex items-center text-xs font-bold text-blue-600 uppercase tracking-wide">
-                                Acessar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
-                            </div>
-                        </a>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Gerador de Etiquetas</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Criação automática de etiquetas (9x9cm) em layout A4 para impressão.</p>
+                        <div class="flex items-center text-xs font-bold text-slate-800 uppercase tracking-wide mt-auto">
+                            Gerar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </a>
 
-                        <a href="otimizador-eliminacao.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-600"></div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition">
-                                    <i class="fas fa-layer-group text-lg"></i>
-                                </div>
-                                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Novo</span>
+                    <a href="visualiza-boxes-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-purple-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-purple-600"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
+                                <i class="fas fa-th text-lg"></i>
                             </div>
-                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Otimizador de Lotes</h4>
-                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Algoritmo para maximizar o número de caixas em blocos de eliminação.</p>
-                            <div class="flex items-center text-xs font-bold text-emerald-600 uppercase tracking-wide">
-                                Otimizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
-                            </div>
-                        </a>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Mapa de Ocupação</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Visualização interativa (Heatmap) do status físico do arquivo.</p>
+                        <div class="flex items-center text-xs font-bold text-purple-600 uppercase tracking-wide mt-auto">
+                            Visualizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </a>
 
-                        <a href="etiqueta-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800 group-hover:bg-slate-800 group-hover:text-white transition">
-                                    <i class="fas fa-print text-lg"></i>
-                                </div>
+                    <a href="https://corretor-datas.onrender.com/" target="_blank" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-amber-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition">
+                                <i class="fas fa-calendar-check text-lg"></i>
                             </div>
-                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Gerador de Etiquetas</h4>
-                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Criação automática de etiquetas (9x9cm) em layout A4 para impressão.</p>
-                            <div class="flex items-center text-xs font-bold text-slate-800 uppercase tracking-wide">
-                                Gerar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
-                            </div>
-                        </a>
+                            <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-cloud mr-1"></i>Web</span>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Auditor de Datas</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Validação automática de temporalidade comparando planilhas contra tabelas PDF.</p>
+                        <div class="flex items-center text-xs font-bold text-amber-600 uppercase tracking-wide mt-auto">
+                            Auditar <i class="fas fa-external-link-alt ml-2 text-[10px] group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </a>
 
-                        <a href="visualiza-boxes-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1 h-full bg-purple-600"></div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
-                                    <i class="fas fa-th text-lg"></i>
-                                </div>
+                    <a href="https://sistema-arquivos-app.onrender.com/" target="_blank" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-slate-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden opacity-90">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-slate-400"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-600 group-hover:text-white transition">
+                                <i class="fas fa-network-wired text-lg"></i>
                             </div>
-                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Mapa de Ocupação</h4>
-                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Visualização interativa (Heatmap) do status físico do arquivo.</p>
-                            <div class="flex items-center text-xs font-bold text-purple-600 uppercase tracking-wide">
-                                Visualizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
-                            </div>
-                        </a>
+                             <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-flask mr-1"></i>Beta</span>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Gestão de Fluxo</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-2">Controle completo do ciclo de vida documental e rastreabilidade.</p>
+                        <div class="flex items-center text-xs font-bold text-slate-500 uppercase tracking-wide mt-auto">
+                            Acessar <i class="fas fa-external-link-alt ml-2 text-[10px] group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </a>
 
-                    </div>
                 </div>
-
-                <div id="tab-externos" class="aba-conteudo hidden space-y-6">
-                    
-                    <h3 class="font-serif text-lg text-slate-700 mb-4 border-b border-slate-200 pb-2">Sistemas em Nuvem</h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        
-                        <a href="https://corretor-datas.onrender.com/" target="_blank" class="flex items-center p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition group">
-                            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl mr-4 group-hover:bg-amber-500 group-hover:text-white transition">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-serif font-bold text-slate-800">Auditor de Datas</h4>
-                                <p class="text-xs text-slate-500 mt-1">Validação de temporalidade vs PDF oficial.</p>
-                            </div>
-                            <div class="ml-auto text-slate-300 group-hover:text-amber-500 transition">
-                                <i class="fas fa-external-link-alt"></i>
-                            </div>
-                        </a>
-
-                        <a href="https://sistema-arquivos-app.onrender.com/" target="_blank" class="flex items-center p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition group opacity-75 hover:opacity-100">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xl mr-4 group-hover:bg-slate-800 group-hover:text-white transition">
-                                <i class="fas fa-network-wired"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-serif font-bold text-slate-800">Gestão de Fluxo</h4>
-                                <p class="text-xs text-slate-500 mt-1">Controle de ciclo de vida (Beta).</p>
-                            </div>
-                            <div class="ml-auto text-slate-300 group-hover:text-slate-800 transition">
-                                <i class="fas fa-external-link-alt"></i>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-
             </div>
         </main>
     </div>
 
-    <script>
-        function showTab(tabName) {
-            // Esconde todas as abas
-            document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.add('hidden'));
-            
-            // Mostra a aba selecionada com animação
-            const activeTab = document.getElementById(`tab-${tabName}`);
-            activeTab.classList.remove('hidden');
-            activeTab.classList.add('fade-in');
-            setTimeout(() => activeTab.classList.remove('fade-in'), 400);
-
-            // Reseta estilo dos botões (Sidebar)
-            ['dashboard', 'externos'].forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                if(btn) {
-                    btn.className = "w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800 group flex items-center gap-3";
-                    const icon = btn.querySelector('i');
-                    // Remove cor de destaque
-                    if(t === 'dashboard') icon.classList.remove('text-amber-500');
-                }
-            });
-
-            // Ativa botão atual
-            const activeBtn = document.getElementById(`btn-${tabName}`);
-            if(activeBtn) {
-                activeBtn.className = "w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-amber-500 bg-slate-800 text-white shadow-lg group flex items-center gap-3";
-                activeBtn.querySelector('i').classList.add('text-amber-500');
-            }
-
-            // Atualiza Título da Página
-            if(tabName === 'dashboard') {
-                document.getElementById('page-title').innerText = "Visão Geral";
-                document.getElementById('page-subtitle').innerText = "Ferramentas de processamento local.";
-            } else {
-                document.getElementById('page-title').innerText = "Sistemas Web";
-                document.getElementById('page-subtitle').innerText = "Aplicações hospedadas em nuvem.";
-            }
-        }
-    </script>
 </body>
 </html>
