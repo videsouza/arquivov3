@@ -1,395 +1,245 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hub de Serviços | Gestão Documental</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* --- DESIGN SYSTEM: MINIMALISTA & SÓBRIO --- */
-        :root {
-            /* Paleta Corporativa Sóbria */
-            --primary: #0f172a;       /* Slate 900 (Quase preto, azulado) */
-            --secondary: #334155;     /* Slate 700 (Cinza chumbo) */
-            --accent: #2563eb;        /* Azul Royal (Discreto, para ações) */
-            
-            /* Superfícies */
-            --bg-body: #f8fafc;       /* Cinza muito claro, frio */
-            --bg-card: #ffffff;
-            
-            /* Texto */
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            
-            /* Efeitos */
-            --radius: 8px;            /* Bordas menos arredondadas = mais sério */
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Reset e Base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased; /* Texto mais nítido */
-            padding-bottom: 60px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* --- HERO SECTION --- */
-        .hero {
-            padding: 80px 0 60px;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-size: 48px;
-            font-weight: 600; /* Peso médio é mais elegante que bold */
-            letter-spacing: -0.03em; /* Tight tracking */
-            color: var(--primary);
-            margin-bottom: 16px;
-        }
-
-        .hero p {
-            font-size: 18px;
-            color: var(--text-muted);
-            font-weight: 300;
-        }
-
-        .hero-tag {
-            display: inline-block;
-            background: #e2e8f0;
-            color: var(--secondary);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 4px 12px;
-            border-radius: 100px;
-            margin-bottom: 24px;
-        }
-
-        /* --- STATS BAR (Estilo Dashboard) --- */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-bottom: 80px;
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0;
-        }
-
-        .stat-item {
-            text-align: center;
-            border-right: 1px solid #f1f5f9;
-        }
-
-        .stat-item:last-child { border-right: none; }
-
-        .stat-value {
-            display: block;
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--primary);
-            letter-spacing: -0.02em;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 4px;
-        }
-
-        /* --- GRID DE SERVIÇOS --- */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .service-card {
-            background: var(--bg-card);
-            border: 1px solid #f1f5f9; /* Borda ultra sutil */
-            border-radius: var(--radius);
-            padding: 32px;
-            text-decoration: none;
-            color: inherit;
-            transition: var(--transition);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .service-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: #cbd5e1;
-        }
-
-        /* Header do Card */
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            background: #f1f5f9;
-            color: var(--secondary);
-            border-radius: 6px; /* Quadrado arredondado = mais técnico */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: var(--transition);
-        }
-
-        .service-card:hover .card-icon {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        /* Badge minimalista */
-        .badge {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: var(--primary);
-            background: #e2e8f0;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
         
-        .badge.popular { background: #dbeafe; color: #1e40af; } /* Azul suave */
-        .badge.new { background: #dcfce7; color: #166534; }     /* Verde suave */
+        /* Barra de rolagem elegante */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Conteúdo do Card */
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 12px;
-            letter-spacing: -0.01em;
-        }
-
-        .card-desc {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-            line-height: 1.7;
-            flex-grow: 1;
-        }
-
-        /* Lista de Features */
-        .features-list {
-            list-style: none;
-            margin-top: auto;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 16px;
-        }
-
-        .features-list li {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .features-list li i {
-            color: var(--accent); /* Apenas o check é colorido */
-            font-size: 10px;
-            opacity: 0.8;
-        }
-
-        /* Botão/Link "Ghost" */
-        .card-action {
-            margin-top: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-
-        .service-card:hover .card-action {
-            color: var(--accent);
-            gap: 10px;
-        }
-
-        /* --- FOOTER --- */
-        .footer {
-            margin-top: 100px;
-            padding-top: 40px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-
-        .footer a {
-            color: var(--text-muted);
-            text-decoration: none;
-            border-bottom: 1px dotted #cbd5e1;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 32px; }
-            .stats-container { grid-template-columns: 1fr; gap: 40px; }
-            .stat-item { border-right: none; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-            .stat-item:last-child { border-bottom: none; }
-        }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
 
-    <div class="container">
+    <div class="flex h-full max-w-[1600px] mx-auto w-full shadow-2xl bg-white my-0 md:my-4 md:rounded-xl overflow-hidden border border-slate-200">
         
-        <header class="hero">
-            <span class="hero-tag">Versão Beta 2025</span>
-            <h1>Hub de Gestão Documental</h1>
-            <p>Central de inteligência para processamento, análise e otimização de acervos físicos e digitais.</p>
-        </header>
+        <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="p-8 border-b border-slate-800">
+                    <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-amber-500">.Doc</span></h1>
+                    <p class="text-[10px] text-slate-400 mt-2 font-light tracking-wider uppercase">Central de Inteligência</p>
+                </div>
 
-        <section class="stats-container">
-            <div class="stat-item">
-                <span class="stat-value">6</span>
-                <span class="stat-label">Módulos Ativos</span>
+                <nav class="mt-8 px-4 space-y-2">
+                    <button onclick="showTab('dashboard')" id="btn-dashboard" class="w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-amber-500 bg-slate-800 text-white shadow-lg group flex items-center gap-3">
+                        <i class="fa-solid fa-grid-2 w-5 text-amber-500"></i> 
+                        <span class="font-medium text-sm tracking-wide">Ferramentas</span>
+                    </button>
+                    
+                    <button onclick="showTab('externos')" id="btn-externos" class="w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800 group flex items-center gap-3">
+                        <i class="fa-solid fa-cloud w-5"></i> 
+                        <span class="font-medium text-sm tracking-wide">Sistemas Web</span>
+                    </button>
+                    
+                    <div class="pt-4 mt-4 border-t border-slate-800">
+                        <p class="px-4 text-[10px] text-slate-500 uppercase tracking-widest mb-2">Suporte</p>
+                        <a href="#" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition"><i class="fa-regular fa-circle-question mr-2"></i> Ajuda</a>
+                    </div>
+                </nav>
             </div>
-            <div class="stat-item">
-                <span class="stat-value">IA</span>
-                <span class="stat-label">Processamento Neural</span>
+
+            <div class="p-6 border-t border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-bold font-serif">V</div>
+                    <div>
+                        <p class="text-xs font-bold text-white">Vinicius Souza</p>
+                        <p class="text-[10px] text-slate-400">Admin</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat-item">
-                <span class="stat-value">Local</span>
-                <span class="stat-label">Criptografia de Dados</span>
+        </aside>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around p-4 z-50 border-t border-slate-800">
+            <button onclick="showTab('dashboard')" class="flex flex-col items-center gap-1">
+                <i class="fa-solid fa-grid-2 text-xl mb-1"></i>
+                <span class="text-[10px]">Início</span>
+            </button>
+            <button onclick="showTab('externos')" class="flex flex-col items-center gap-1 text-slate-400">
+                <i class="fa-solid fa-cloud text-xl mb-1"></i>
+                <span class="text-[10px]">Web</span>
+            </button>
+        </div>
+
+        <main class="flex-1 flex flex-col bg-slate-50 relative overflow-hidden">
+            
+            <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center shadow-sm z-10">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-serif text-slate-800">Visão Geral</h2>
+                    <p id="page-subtitle" class="text-xs text-slate-500 font-sans mt-1">Selecione uma ferramenta para começar.</p>
+                </div>
+                <div class="md:hidden text-amber-500 font-serif font-bold text-xl">Hub.Doc</div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth">
+                
+                <div id="tab-dashboard" class="aba-conteudo space-y-6">
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Módulos</p>
+                            <p class="text-2xl font-serif text-slate-800 mt-1">06</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Status</p>
+                            <p class="text-2xl font-serif text-emerald-600 mt-1">Ativo</p>
+                        </div>
+                    </div>
+
+                    <h3 class="font-serif text-lg text-slate-700 mb-4 border-b border-slate-200 pb-2">Ferramentas de Processamento</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        <a href="super-analista.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                                    <i class="fas fa-chart-pie text-lg"></i>
+                                </div>
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Essencial</span>
+                            </div>
+                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Análise de Dados</h4>
+                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Dashboard analítico com insights automáticos gerados a partir de planilhas.</p>
+                            <div class="flex items-center text-xs font-bold text-blue-600 uppercase tracking-wide">
+                                Acessar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </a>
+
+                        <a href="otimizador-eliminacao.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-600"></div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition">
+                                    <i class="fas fa-layer-group text-lg"></i>
+                                </div>
+                                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Novo</span>
+                            </div>
+                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Otimizador de Lotes</h4>
+                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Algoritmo para maximizar o número de caixas em blocos de eliminação.</p>
+                            <div class="flex items-center text-xs font-bold text-emerald-600 uppercase tracking-wide">
+                                Otimizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </a>
+
+                        <a href="etiqueta-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800 group-hover:bg-slate-800 group-hover:text-white transition">
+                                    <i class="fas fa-print text-lg"></i>
+                                </div>
+                            </div>
+                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Gerador de Etiquetas</h4>
+                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Criação automática de etiquetas (9x9cm) em layout A4 para impressão.</p>
+                            <div class="flex items-center text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                Gerar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </a>
+
+                        <a href="visualiza-boxes-gemini.html" class="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-purple-600"></div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
+                                    <i class="fas fa-th text-lg"></i>
+                                </div>
+                            </div>
+                            <h4 class="text-lg font-serif font-bold text-slate-800 mb-2">Mapa de Ocupação</h4>
+                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">Visualização interativa (Heatmap) do status físico do arquivo.</p>
+                            <div class="flex items-center text-xs font-bold text-purple-600 uppercase tracking-wide">
+                                Visualizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="tab-externos" class="aba-conteudo hidden space-y-6">
+                    
+                    <h3 class="font-serif text-lg text-slate-700 mb-4 border-b border-slate-200 pb-2">Sistemas em Nuvem</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <a href="https://corretor-datas.onrender.com/" target="_blank" class="flex items-center p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition group">
+                            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl mr-4 group-hover:bg-amber-500 group-hover:text-white transition">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-serif font-bold text-slate-800">Auditor de Datas</h4>
+                                <p class="text-xs text-slate-500 mt-1">Validação de temporalidade vs PDF oficial.</p>
+                            </div>
+                            <div class="ml-auto text-slate-300 group-hover:text-amber-500 transition">
+                                <i class="fas fa-external-link-alt"></i>
+                            </div>
+                        </a>
+
+                        <a href="https://sistema-arquivos-app.onrender.com/" target="_blank" class="flex items-center p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition group opacity-75 hover:opacity-100">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xl mr-4 group-hover:bg-slate-800 group-hover:text-white transition">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-serif font-bold text-slate-800">Gestão de Fluxo</h4>
+                                <p class="text-xs text-slate-500 mt-1">Controle de ciclo de vida (Beta).</p>
+                            </div>
+                            <div class="ml-auto text-slate-300 group-hover:text-slate-800 transition">
+                                <i class="fas fa-external-link-alt"></i>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
             </div>
-        </section>
-
-        <section class="services-grid">
-
-            <a href="super-analista.html" class="service-card">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
-                    <span class="badge popular">Essencial</span>
-                </div>
-                <h3 class="card-title">Análise de Dados</h3>
-                <p class="card-desc">Dashboard analítico com insights automáticos gerados a partir de planilhas de acervo bruto.</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> Gráficos Interativos</li>
-                    <li><i class="fas fa-check"></i> Insights via IA</li>
-                    <li><i class="fas fa-check"></i> Análise de Frequência</li>
-                </ul>
-                <div class="card-action">Acessar Ferramenta <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-            <a href="otimizador-eliminacao.html" class="service-card">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-layer-group"></i></div>
-                    <span class="badge new">Novo</span>
-                </div>
-                <h3 class="card-title">Otimizador de Eliminação</h3>
-                <p class="card-desc">Algoritmo para maximizar o número de caixas em blocos de eliminação com restrições.</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> Algoritmo Multi-Estratégia</li>
-                    <li><i class="fas fa-check"></i> Exportação XLS</li>
-                </ul>
-                <div class="card-action">Otimizar Lotes <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-            <a href="etiqueta-gemini.html" class="service-card">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-print"></i></div>
-                    <span class="badge new">Automação</span>
-                </div>
-                <h3 class="card-title">Gerador de Etiquetas</h3>
-                <p class="card-desc">Geração de etiquetas padronizadas (9x9cm) com layout pronto para impressão A4.</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> Layout 3x2 A4</li>
-                    <li><i class="fas fa-check"></i> Padrão Arquivístico</li>
-                </ul>
-                <div class="card-action">Criar Etiquetas <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-            <a href="visualiza-boxes-gemini.html" class="service-card">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-th"></i></div>
-                </div>
-                <h3 class="card-title">Mapa de Ocupação</h3>
-                <p class="card-desc">Visualização interativa 7x7 para gestão física e status de ocupação do arquivo.</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> Heatmap de Status</li>
-                    <li><i class="fas fa-check"></i> Estatísticas em Tempo Real</li>
-                </ul>
-                <div class="card-action">Visualizar Mapa <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-             <a href="https://corretor-datas.onrender.com/" class="service-card">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <span class="badge new">Auditoria</span>
-                </div>
-                <h3 class="card-title">Auditor de Datas</h3>
-                <p class="card-desc">Validação automática de temporalidade comparando planilhas contra tabelas oficiais (PDF).</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> Leitura de PDF/OCR</li>
-                    <li><i class="fas fa-check"></i> Relatório de Discrepâncias</li>
-                </ul>
-                <div class="card-action">Auditar Planilha <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-            <a href="https://sistema-arquivos-app.onrender.com/" class="service-card" style="opacity: 0.7;">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-network-wired"></i></div>
-                    <span class="badge">Em Breve</span>
-                </div>
-                <h3 class="card-title">Fluxo de Trabalho</h3>
-                <p class="card-desc">Gestão completa do ciclo de vida documental, controle de versões e rastreabilidade.</p>
-                <ul class="features-list">
-                    <li><i class="fas fa-clock"></i> Controle de Versão</li>
-                    <li><i class="fas fa-clock"></i> Trilha de Auditoria</li>
-                </ul>
-                <div class="card-action">Em Desenvolvimento <i class="fas fa-arrow-right"></i></div>
-            </a>
-
-        </section>
-
-        <footer class="footer">
-            <p>&copy; 2025 Sistema de Gestão Documental. Uso Interno Restrito.</p>
-            <p style="margin-top: 10px; font-size: 11px;">
-                Desenvolvido por Vinicius A. de Souza
-            </p>
-        </footer>
-
+        </main>
     </div>
 
+    <script>
+        function showTab(tabName) {
+            // Esconde todas as abas
+            document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.add('hidden'));
+            
+            // Mostra a aba selecionada com animação
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.remove('hidden');
+            activeTab.classList.add('fade-in');
+            setTimeout(() => activeTab.classList.remove('fade-in'), 400);
+
+            // Reseta estilo dos botões (Sidebar)
+            ['dashboard', 'externos'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if(btn) {
+                    btn.className = "w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800 group flex items-center gap-3";
+                    const icon = btn.querySelector('i');
+                    // Remove cor de destaque
+                    if(t === 'dashboard') icon.classList.remove('text-amber-500');
+                }
+            });
+
+            // Ativa botão atual
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            if(activeBtn) {
+                activeBtn.className = "w-full text-left px-4 py-3 rounded transition-all duration-300 border-l-4 border-amber-500 bg-slate-800 text-white shadow-lg group flex items-center gap-3";
+                activeBtn.querySelector('i').classList.add('text-amber-500');
+            }
+
+            // Atualiza Título da Página
+            if(tabName === 'dashboard') {
+                document.getElementById('page-title').innerText = "Visão Geral";
+                document.getElementById('page-subtitle').innerText = "Ferramentas de processamento local.";
+            } else {
+                document.getElementById('page-title').innerText = "Sistemas Web";
+                document.getElementById('page-subtitle').innerText = "Aplicações hospedadas em nuvem.";
+            }
+        }
+    </script>
 </body>
 </html>
