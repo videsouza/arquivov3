@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Etiquetas | Hub.Doc</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800;900&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Configurações Base --- */
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+        
+        /* Barra de Rolagem */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CSS DE IMPRESSÃO (CRÍTICO PARA A4) --- */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0; /* Remove margens do navegador */
+            }
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+                overflow: hidden; /* Evita vazamento */
+            }
+            /* Esconde tudo que não for área de impressão */
+            aside, header, .no-print { display: none !important; }
+            
+            /* Mostra a área de impressão */
+            #print-area {
+                display: grid !important;
+                width: 210mm;
+                height: 296mm; /* Um pouco menos que 297mm por segurança */
+                grid-template-columns: 1fr 1fr; /* 2 Colunas */
+                grid-template-rows: 1fr 1fr 1fr; /* 3 Linhas */
+                padding: 10mm; /* Margem de segurança interna */
+                gap: 5mm; /* Espaço entre etiquetas */
+                page-break-after: always;
+            }
+
+            .label-item {
+                border: 1px dashed #ccc; /* Borda leve para recorte */
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Preview na tela (Simula A4) */
+        .preview-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 90mm); /* Altura fixa aproximada */
+            padding: 10mm;
+            gap: 5mm;
+        }
+
+        /* Estilo da Nova Etiqueta (Numérica) */
+        .label-numero-bg {
+            background-color: white;
+            border: 4px solid #1e293b; /* Slate 800 */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Estilo da Etiqueta Padrão (Caixa) */
+        .label-padrao-bg {
+            background-color: white;
+            border: 2px solid #1e293b;
+            height: 100%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <div class="flex h-full max-w-[1600px] mx-auto w-full shadow-2xl bg-white my-0 md:my-4 md:rounded-xl overflow-hidden border border-slate-200">
+        
+        <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="p-8 border-b border-slate-800">
+                    <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-amber-500">.Doc</span></h1>
+                    <p class="text-[10px] text-slate-400 mt-2 font-light tracking-wider uppercase">Impressão</p>
+                </div>
+
+                <nav class="mt-8 px-4 space-y-2">
+                    <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-arrow-left w-5"></i> 
+                        <span class="font-medium text-sm tracking-wide">Voltar ao Hub</span>
+                    </a>
+                    
+                    <div class="px-4 py-2 text-[10px] text-slate-500 uppercase tracking-widest font-bold border-b border-slate-800 mb-2">Ações</div>
+
+                    <button onclick="window.print()" class="w-full text-left px-4 py-3 rounded bg-amber-600 hover:bg-amber-700 text-white shadow-lg transition flex items-center gap-3 mb-2">
+                        <i class="fa-solid fa-print w-5"></i> 
+                        <span class="font-medium text-sm">Imprimir A4</span>
+                    </button>
+                    
+                    <button onclick="limparTudo()" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition flex items-center gap-3">
+                        <i class="fa-solid fa-trash w-5"></i> 
+                        <span class="font-medium text-sm">Limpar Folha</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-6 border-t border-slate-800">
+                <div class="flex items-center gap-3 opacity-60">
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-bold font-serif text-xs">V</div>
+                    <div><p class="text-xs font-bold text-white">Vinicius Souza</p></div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around p-4 z-50 border-t border-slate-800">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white"><i class="fa-solid fa-arrow-left text-xl"></i><span class="text-[10px]">Voltar</span></a>
+            <button onclick="limparTudo()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-trash text-xl"></i><span class="text-[10px]">Limpar</span></button>
+            <button onclick="window.print()" class="flex flex-col items-center gap-1 text-amber-500"><i class="fa-solid fa-print text-xl"></i><span class="text-[10px]">Print</span></button>
+        </div>
+
+        <main class="flex-1 flex flex-col bg-slate-50 relative overflow-hidden">
+            
+            <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center shadow-sm z-10 no-print">
+                <div>
+                    <h2 class="text-2xl font-serif text-slate-800">Gerador de Etiquetas</h2>
+                    <p class="text-xs text-slate-500 font-sans mt-1">Layout ajustado para folha A4 (6 etiquetas por folha).</p>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-hidden flex flex-col md:flex-row relative">
+                
+                <div class="w-full md:w-1/3 bg-white border-r border-slate-200 p-6 overflow-y-auto no-print z-20 shadow-xl">
+                    
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Modelo de Etiqueta</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="mudarModelo('padrao')" id="btn-padrao" class="border-2 border-slate-800 bg-slate-800 text-white p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 transition">
+                                <i class="fa-regular fa-file-alt text-xl"></i>
+                                Padrão
+                            </button>
+                            <button onclick="mudarModelo('numero')" id="btn-numero" class="border-2 border-slate-200 text-slate-400 p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 hover:border-slate-400 transition">
+                                <i class="fa-solid fa-hashtag text-xl"></i>
+                                Numérica
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="formEtiqueta" onsubmit="adicionarEtiqueta(event)">
+                        
+                        <div id="inputs-padrao" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Unidade/Setor</label>
+                                <input type="text" id="p_unidade" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500" placeholder="Ex: Financeiro">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Processo/Cx</label>
+                                    <input type="text" id="p_processo" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Data</label>
+                                    <input type="text" id="p_data" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500" placeholder="dd/mm/aaaa">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Conteúdo/Descrição</label>
+                                <textarea id="p_desc" rows="3" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="inputs-numero" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Nome do Setor</label>
+                                <input type="text" id="n_setor" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500 font-bold uppercase" placeholder="Ex: PROTOCOLO GERAL">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Número Grande</label>
+                                <input type="number" id="n_numero" class="w-full border border-slate-300 rounded p-2 text-2xl font-bold outline-none focus:border-amber-500 text-center" placeholder="93">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Data/Ano</label>
+                                <input type="text" id="n_data" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-amber-500" placeholder="2025">
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex flex-col gap-3">
+                            <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-lg font-bold shadow hover:bg-black transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Adicionar
+                            </button>
+                            <button type="button" onclick="preencherRestante()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-lg font-bold hover:bg-slate-200 transition text-sm">
+                                Preencher Página Completa
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        A folha comporta <strong>6 etiquetas</strong>. O sistema cria novas páginas automaticamente se exceder.
+                    </div>
+                </div>
+
+                <div class="flex-1 bg-slate-100 overflow-y-auto p-8 relative">
+                    <div id="print-area" class="preview-sheet">
+                        </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- ESTADO ---
+        let modeloAtual = 'padrao';
+        let etiquetas = [];
+
+        // --- LÓGICA DE INTERFACE ---
+        
+        function mudarModelo(modelo) {
+            modeloAtual = modelo;
+            
+            // Atualiza botões visuais
+            const btnPadrao = document.getElementById('btn-padrao');
+            const btnNumero = document.getElementById('btn-numero');
+            const formPadrao = document.getElementById('inputs-padrao');
+            const formNumero = document.getElementById('inputs-numero');
+
+            if(modelo === 'padrao') {
+                btnPadrao.className = "border-2 border-slate-800 bg-slate-800 text-white p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 transition";
+                btnNumero.className = "border-2 border-slate-200 text-slate-400 p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 hover:border-slate-400 transition";
+                formPadrao.classList.remove('hidden');
+                formNumero.classList.add('hidden');
+            } else {
+                btnPadrao.className = "border-2 border-slate-200 text-slate-400 p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 hover:border-slate-400 transition";
+                btnNumero.className = "border-2 border-slate-800 bg-slate-800 text-white p-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 transition";
+                formPadrao.classList.add('hidden');
+                formNumero.classList.remove('hidden');
+            }
+        }
+
+        // --- LÓGICA DE ETIQUETAS ---
+
+        function adicionarEtiqueta(e) {
+            e.preventDefault();
+            
+            const dados = {};
+            dados.tipo = modeloAtual;
+
+            if(modeloAtual === 'padrao') {
+                dados.unidade = document.getElementById('p_unidade').value || '__________';
+                dados.processo = document.getElementById('p_processo').value || '__________';
+                dados.data = document.getElementById('p_data').value || '___/___/___';
+                dados.desc = document.getElementById('p_desc').value || '';
+            } else {
+                dados.setor = document.getElementById('n_setor').value || 'SETOR';
+                dados.numero = document.getElementById('n_numero').value || '00';
+                dados.data = document.getElementById('n_data').value || 'DATA';
+            }
+
+            etiquetas.push(dados);
+            renderizar();
+        }
+
+        function preencherRestante() {
+            if(etiquetas.length === 0 && modeloAtual === 'numero') {
+                // Se estiver vazio e for numérico, adiciona um dummy para preencher
+                 const dados = {
+                    tipo: 'numero',
+                    setor: document.getElementById('n_setor').value || 'SETOR',
+                    numero: document.getElementById('n_numero').value || '00',
+                    data: document.getElementById('n_data').value || 'DATA'
+                };
+                etiquetas.push(dados);
+            } else if (etiquetas.length === 0) {
+                 const dados = {
+                    tipo: 'padrao',
+                    unidade: document.getElementById('p_unidade').value || '__________',
+                    processo: document.getElementById('p_processo').value || '__________',
+                    data: document.getElementById('p_data').value || '___/___/___',
+                    desc: document.getElementById('p_desc').value || ''
+                };
+                etiquetas.push(dados);
+            }
+
+            // Clona a última etiqueta até completar múltiplo de 6 ou pelo menos uma página
+            const ultima = etiquetas[etiquetas.length - 1];
+            const faltam = 6 - (etiquetas.length % 6);
+            
+            if(faltam < 6) {
+                for(let i=0; i<faltam; i++) {
+                    etiquetas.push({...ultima}); // Cópia do objeto
+                }
+            } else if (etiquetas.length < 6) {
+                 for(let i=0; i<6; i++) {
+                    etiquetas.push({...ultima});
+                }
+            }
+            renderizar();
+        }
+
+        function limparTudo() {
+            if(confirm('Limpar todas as etiquetas da folha?')) {
+                etiquetas = [];
+                renderizar();
+            }
+        }
+
+        function removerEtiqueta(index) {
+            etiquetas.splice(index, 1);
+            renderizar();
+        }
+
+        // --- RENDERIZAÇÃO HTML ---
+
+        function renderizar() {
+            const container = document.getElementById('print-area');
+            container.innerHTML = '';
+
+            etiquetas.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'label-item relative group'; // Adiciona group para hover
+                
+                // Botão de excluir (só aparece na tela, não na impressão)
+                const btnRemove = `
+                    <button onclick="removerEtiqueta(${index})" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition no-print z-10">
+                        <i class="fa-solid fa-times text-xs"></i>
+                    </button>
+                `;
+
+                if(item.tipo === 'padrao') {
+                    div.innerHTML = `
+                        ${btnRemove}
+                        <div class="label-padrao-bg">
+                            <div style="border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <h3 style="font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: #1e293b;">ARQUIVO GERAL</h3>
+                                    <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Controle Documental</p>
+                                </div>
+                                <i class="fa-solid fa-box-archive text-2xl text-slate-300"></i>
+                            </div>
+
+                            <div style="flex: 1; display: flex; flex-col; gap: 8px;">
+                                <div style="display: flex; border-bottom: 1px dotted #ccc; padding: 4px 0;">
+                                    <strong style="width: 80px; color: #64748b;">Unidade:</strong>
+                                    <span style="font-weight: 600; color: #1e293b;">${item.unidade}</span>
+                                </div>
+                                <div style="display: flex; border-bottom: 1px dotted #ccc; padding: 4px 0;">
+                                    <strong style="width: 80px; color: #64748b;">Processo:</strong>
+                                    <span style="font-weight: 600; color: #1e293b;">${item.processo}</span>
+                                </div>
+                                <div style="display: flex; border-bottom: 1px dotted #ccc; padding: 4px 0;">
+                                    <strong style="width: 80px; color: #64748b;">Data:</strong>
+                                    <span style="font-weight: 600; color: #1e293b;">${item.data}</span>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <strong style="display: block; color: #64748b; margin-bottom: 4px;">Descrição:</strong>
+                                    <div style="height: 60px; background: #f8fafc; padding: 5px; border-radius: 4px; font-size: 11px;">${item.desc}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #94a3b8; text-transform: uppercase;">
+                                Hub.Doc System
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // NOVA ETIQUETA NUMÉRICA
+                    div.innerHTML = `
+                        ${btnRemove}
+                        <div class="label-numero-bg">
+                            <div style="border-bottom: 3px solid #1e293b; padding-bottom: 10px;">
+                                <h2 style="font-size: 24px; font-weight: 800; text-transform: uppercase; line-height: 1.1; color: #1e293b;">${item.setor}</h2>
+                            </div>
+                            
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 140px; font-weight: 900; color: #1e293b; letter-spacing: -5px; line-height: 1;">${item.numero}</span>
+                            </div>
+
+                            <div style="border-top: 3px solid #1e293b; padding-top: 10px;">
+                                <p style="font-size: 18px; font-weight: 600; color: #1e293b; text-transform: uppercase;">${item.data}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+    </script>
+</body>
+</html>
