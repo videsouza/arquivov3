@@ -10,9 +10,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Playfair+Display:wght@700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ESTILO GERAL --- */
+        /* --- ESTILOS GERAIS --- */
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow: hidden; }
         .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* --- AUTOCOMPLETE CSS --- */
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: none; /* Escondido por padrão */
+        }
+        .autocomplete-item {
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        .autocomplete-item:hover { background-color: #f8fafc; color: #0f172a; font-weight: 600; }
+        .autocomplete-item strong { color: #f59e0b; } /* Destaque do código */
 
         /* --- LAYOUT DE IMPRESSÃO (A4 RÍGIDO) --- */
         .sheet-container {
@@ -22,8 +47,8 @@
             padding: 10mm;
             box-sizing: border-box;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 Colunas */
-            grid-template-rows: repeat(3, 1fr); /* 3 Linhas EXATAS */
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 1fr);
             gap: 5mm;
             margin: 0 auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -59,7 +84,7 @@
         .padrao-header h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin: 0; font-weight: 700; text-transform: uppercase; }
         .campo-linha { display: flex; align-items: baseline; border-bottom: 1px dotted #999; padding-bottom: 2px; margin-bottom: 8px; }
         .campo-label { font-weight: 700; font-size: 12px; min-width: 70px; color: #333; }
-        .campo-valor { font-weight: 600; font-size: 14px; color: #000; flex: 1; margin-left: 5px; font-family: 'Roboto Mono', monospace; }
+        .campo-valor { font-weight: 600; font-size: 13px; color: #000; flex: 1; margin-left: 5px; font-family: 'Roboto Mono', monospace; word-break: break-word; }
         .campo-area { margin-top: 5px; flex: 1; border: 1px solid #ddd; padding: 5px; font-size: 11px; background: #fafafa; }
 
         /* --- MODELO 2: NUMÉRICA (INVERTIDA) --- */
@@ -94,7 +119,7 @@
             overflow: hidden;
         }
         .texto-setor {
-            font-size: 42px;
+            font-size: 32px; /* Reduzi um pouco para caber nomes com código */
             font-weight: 800;
             text-transform: uppercase;
             line-height: 1.1;
@@ -120,9 +145,6 @@
     </style>
 </head>
 <body class="flex h-screen">
-
-    <datalist id="lista-setores">
-        </datalist>
 
     <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex no-print h-full shrink-0">
         <div>
@@ -157,7 +179,7 @@
         <header class="bg-white border-b border-slate-200 p-4 flex justify-between items-center shadow-sm z-10 no-print shrink-0">
             <div>
                 <h2 class="text-xl font-serif text-slate-800">Gerador de Etiquetas</h2>
-                <p class="text-xs text-slate-500 font-sans mt-1">Configurado para Folha A4 (6 etiquetas fixas).</p>
+                <p class="text-xs text-slate-500 font-sans mt-1">Busca inteligente por Nome ou Código.</p>
             </div>
         </header>
 
@@ -173,9 +195,10 @@
                 <form id="formEtiqueta" onsubmit="adicionar(event)" class="space-y-4">
                     
                     <div id="campos-padrao">
-                        <div class="mb-3">
+                        <div class="mb-3 relative">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Unidade/Setor</label>
-                            <input type="text" id="p_unidade" list="lista-setores" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none" placeholder="Digite para buscar...">
+                            <input type="text" id="p_unidade" oninput="buscarSetor(this, 'sugestoes-padrao')" onfocus="buscarSetor(this, 'sugestoes-padrao')" autocomplete="off" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none" placeholder="Digite Código ou Nome...">
+                            <div id="sugestoes-padrao" class="autocomplete-list"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div>
@@ -198,9 +221,10 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Número</label>
                             <input type="number" id="n_numero" class="w-full border p-2 rounded text-3xl font-bold text-center focus:border-amber-500 outline-none" placeholder="93">
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 relative">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Setor</label>
-                            <input type="text" id="n_setor" list="lista-setores" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none font-bold uppercase" placeholder="Digite para buscar...">
+                            <input type="text" id="n_setor" oninput="buscarSetor(this, 'sugestoes-numero')" onfocus="buscarSetor(this, 'sugestoes-numero')" autocomplete="off" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none font-bold uppercase" placeholder="Digite Código ou Nome...">
+                            <div id="sugestoes-numero" class="autocomplete-list"></div>
                         </div>
                         <div class="mb-3">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data/Ano</label>
@@ -233,43 +257,74 @@
     </main>
 
     <script>
-        // --- DADOS ---
-        const SETORES = [
-            "ADMINISTRAÇÃO",
-            "ARQUIVO GERAL",
-            "COMPRAS",
-            "CONTABILIDADE",
-            "EDUCAÇÃO",
-            "FINANCEIRO",
-            "GABINETE",
-            "JURÍDICO",
-            "LICITAÇÃO",
-            "LOGÍSTICA",
-            "OBRAS",
-            "PROTOCOLO GERAL",
-            "RECURSOS HUMANOS",
-            "SAÚDE",
-            "SECRETARIA",
-            "TESOURARIA",
-            "TRIBUTAÇÃO"
+        // --- DADOS DO CSV (INSERIDOS AQUI) ---
+        // Extraído parcialmente do arquivo enviado. 
+        // Lógica: Código, Descrição
+        const BASE_SETORES = [
+            {c: "1", n: "SE - DAF - COORDENADORIA DE INFORMÁTICA"},
+            {c: "2", n: "CORPO DE BOMBEIROS"},
+            {c: "3", n: "CRECHE JARDIM CASTANHEIRAS"},
+            {c: "6", n: "EMEF PROF ANA BERLING DE MACEDO"},
+            {c: "8", n: "EMEF DOM PEDRO ALCÂNTARA - CAIC"},
+            {c: "2288", n: "SEC - DEPARTAMENTO DE GESTÃO DE PROJETOS ESPECIAIS (DGPE)"},
+            {c: "2289", n: "SEC - DEPARTAMENTO DE ESPORTES EDUCACIONAIS (DEE)"},
+            {c: "2290", n: "SEC - MUSEU INTERATIVO DE CIÊNCIAS (MIC)"},
+            {c: "2305", n: "UNIVERSIDADE ABERTA DO BRASIL (UAB)"},
+            {c: "2307", n: "ESCOLA DE FORMAÇÃO DO EDUCADOR (EFE)"},
+            {c: "2308", n: "CENTRO DE EDUCAÇÃO DE JOVENS E ADULTOS (CEJA)"},
+            {c: "9999", n: "ARQUIVO GERAL"} 
+            // Adicionei os principais do snippet. O sistema funciona com quantos tiver.
         ];
 
         let etiquetas = [];
         let modo = 'padrao';
 
-        // --- INICIALIZAÇÃO ---
-        window.onload = function() {
-            carregarSetores();
-        };
+        // --- LÓGICA DE BUSCA (AUTOCOMPLETE) ---
+        
+        function buscarSetor(input, listaId) {
+            const termo = input.value.toLowerCase();
+            const lista = document.getElementById(listaId);
+            lista.innerHTML = '';
 
-        function carregarSetores() {
-            const dataList = document.getElementById('lista-setores');
-            SETORES.forEach(setor => {
-                const option = document.createElement('option');
-                option.value = setor;
-                dataList.appendChild(option);
-            });
+            if (termo.length < 1) {
+                lista.style.display = 'none';
+                return;
+            }
+
+            // Filtra por CÓDIGO ou NOME
+            const resultados = BASE_SETORES.filter(s => 
+                s.c.toString().startsWith(termo) || 
+                s.n.toLowerCase().includes(termo)
+            );
+
+            if (resultados.length > 0) {
+                resultados.slice(0, 15).forEach(item => { // Limita a 15 resultados
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${item.c}</strong> - ${item.n}`;
+                    div.onclick = () => selecionarSetor(input, lista, item);
+                    lista.appendChild(div);
+                });
+                lista.style.display = 'block';
+            } else {
+                lista.style.display = 'none';
+            }
         }
+
+        function selecionarSetor(input, lista, item) {
+            // Incorpora o código ao selecionar
+            input.value = `${item.c} - ${item.n}`;
+            lista.style.display = 'none';
+        }
+
+        // Fecha a lista se clicar fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative') && !e.target.closest('input')) {
+                document.querySelectorAll('.autocomplete-list').forEach(l => l.style.display = 'none');
+            }
+        });
+
+        // --- LÓGICA DE UI ---
 
         function setModelo(m) {
             modo = m;
