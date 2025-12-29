@@ -41,17 +41,23 @@
 
         /* --- LAYOUTS ESPECÍFICOS --- */
 
-        /* 1. ELIMINAÇÃO (Ajustado) */
+        /* 1. ELIMINAÇÃO (Compactado para subir conteúdo) */
         .layout-eliminacao {
-            border: 2px solid #000; height: 100%; padding: 12px;
+            border: 2px solid #000; height: 100%; 
+            padding: 8px; /* Reduzido de 12px para ganhar espaço */
             display: flex; flex-direction: column; font-family: Arial, sans-serif;
         }
         .eli-header {
             text-align: center; font-weight: 900; text-transform: uppercase;
-            font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;
+            font-size: 14px; /* Reduzido levemente */
+            border-bottom: 2px solid #000; 
+            padding-bottom: 2px; 
+            margin-bottom: 4px; /* Reduzido o espaço abaixo do título */
         }
         .eli-row {
-            display: flex; gap: 8px; margin-bottom: 5px; align-items: baseline;
+            display: flex; gap: 8px; 
+            margin-bottom: 4px; /* Reduzido de 6px para 4px para compactar */
+            align-items: baseline;
         }
         .eli-label {
             font-weight: 700; font-size: 11px; white-space: nowrap;
@@ -64,11 +70,10 @@
             border-bottom: 1px solid #000; display: inline-block; height: 14px; margin-left: 5px;
         }
         .eli-fixed {
-            font-size: 11px; font-weight: 700; color: #333;
+            font-size: 10px; font-weight: 700; color: #333; /* Fonte levemente menor para caber melhor */
         }
         .eli-desc-box {
             border: 1px solid #999; flex: 1; padding: 5px; font-size: 11px; margin-top: 2px;
-            /* Aumentado o espaço visual */
             min-height: 80px; 
         }
 
