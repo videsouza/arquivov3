@@ -47,60 +47,19 @@
             position: relative; background: #fff; padding: 4px; box-sizing: border-box;
         }
 
-        /* --- CSS CRÍTICO DE IMPRESSÃO (CORREÇÃO DE BORDAS) --- */
+        /* --- CSS CRÍTICO DE IMPRESSÃO --- */
         @media print {
-            @page {
-                size: A4;
-                margin: 0; /* Remove margem do navegador */
-            }
-
-            body, html {
-                margin: 0;
-                padding: 0;
-                background-color: white !important;
-                width: 210mm;
-                height: 297mm;
-            }
-
-            /* Esconde toda a interface do sistema */
-            aside, header, .no-print, button, .bg-slate-200, .shadow-lg {
-                display: none !important;
-            }
-
-            /* Força o container principal a ser transparente e ocupar tudo */
-            main, .flex-1 {
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                overflow: visible !important;
-                position: static !important;
-                width: 100% !important;
-                height: 100% !important;
-                display: block !important;
-            }
-
-            /* Ajusta a folha para ser exata */
-            .sheet-container {
-                width: 210mm !important;
-                height: 296mm !important; /* Altura segura para não gerar pagina extra */
-                margin: 0 !important;
-                padding: 10mm !important; /* Margem interna da etiqueta */
-                box-shadow: none !important;
-                border: none !important;
-                transform: none !important; /* CRÍTICO: Remove o zoom da tela */
-                position: absolute;
-                top: 0;
-                left: 0;
-                display: grid !important;
-            }
-
-            /* Remove pontilhado de recorte na impressão para ficar limpo (opcional, se quiser manter remova esta linha) */
+            @page { size: A4; margin: 0; }
+            body, html { margin: 0; padding: 0; background-color: white !important; width: 210mm; height: 297mm; }
+            aside, header, .no-print, button, .bg-slate-200, .shadow-lg { display: none !important; }
+            main, .flex-1 { margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; position: static !important; width: 100% !important; height: 100% !important; display: block !important; }
+            .sheet-container { width: 210mm !important; height: 296mm !important; margin: 0 !important; padding: 10mm !important; box-shadow: none !important; border: none !important; transform: none !important; position: absolute; top: 0; left: 0; display: grid !important; }
             .etiqueta-box { border: 1px dashed #ccc !important; } 
         }
 
         /* --- LAYOUTS ESPECÍFICOS --- */
 
-        /* 1. ELIMINAÇÃO (Compactado) */
+        /* 1. ELIMINAÇÃO */
         .layout-eliminacao {
             border: 2px solid #000; height: 100%; 
             padding: 8px; 
@@ -118,16 +77,26 @@
             margin-bottom: 4px; 
             align-items: baseline;
         }
-        .eli-label { font-weight: 700; font-size: 11px; white-space: nowrap; }
+        .eli-label { font-weight: 700; font-size: 11px; white-space: nowrap; color: #000; }
         .eli-value {
             border-bottom: 1px dotted #000; flex: 1; font-size: 12px; font-weight: 600; padding-left: 5px;
-            min-height: 16px; font-family: 'Roboto Mono', monospace;
+            min-height: 16px; font-family: 'Roboto Mono', monospace; color: #000;
         }
         .eli-blank-line { border-bottom: 1px solid #000; display: inline-block; height: 14px; margin-left: 5px; }
-        .eli-fixed { font-size: 10px; font-weight: 700; color: #333; }
+        
+        /* CORRIGIDO: Fonte mais forte e preta para os textos fixos */
+        .eli-fixed { 
+            font-size: 11px; 
+            font-weight: 800; /* Extra Bold */
+            color: #000000 !important; /* Preto Puro */
+            text-transform: uppercase;
+        }
+        
         .eli-desc-box {
-            border: 1px solid #999; flex: 1; padding: 5px; font-size: 11px; margin-top: 2px;
+            border: 1px solid #000; /* Borda preta sólida */
+            flex: 1; padding: 5px; font-size: 11px; margin-top: 2px;
             min-height: 80px; 
+            color: #000;
         }
 
         /* 2. PERMANENTE */
@@ -318,9 +287,6 @@
 
     <script>
         // --- BANCO DE DADOS COMPLETO ---
-        // (AQUI VAI A LISTA COMPLETA QUE JÁ USAMOS ANTES)
-        // Por brevidade na resposta, mantive o código JS e a lista idênticos à versão anterior funcional, 
-        // mas você deve manter a lista completa de setores que você já possui.
         const BASE_SETORES = [
             {c:1,n:"SE - DAF - COORDENADORIA DE INFORMÁTICA"},{c:2,n:"CORPO DE BOMBEIROS"},{c:3,n:"CRECHE JARDIM CASTANHEIRAS"},
             {c:4,n:"CRECHE JARDIM FLAMBOYANT"},{c:5,n:"CRECHE JARDIM TELESPARK"},{c:6,n:"EMEF PROF ANA BERLING DE MACEDO"},
@@ -531,7 +497,7 @@
 
                 if(et.tipo === 'padrao') {
                     if(et.subtipo === 'eliminacao') {
-                        // --- LAYOUT ELIMINAÇÃO CORRIGIDO ---
+                        // --- LAYOUT ELIMINAÇÃO FINAL ---
                         div.innerHTML = `
                             ${btnDel}
                             <div class="layout-eliminacao">
@@ -552,9 +518,8 @@
                                 </div>
                                 <div class="eli-row">
                                     <span class="eli-label">Código:</span>
-                                    <span class="eli-blank-line" style="width: 80px;"></span> <span class="eli-label" style="margin-left:10px;">Sit. Doc.:</span>
-                                    <span class="eli-fixed">AGUARDANDO PLANILHA</span>
-                                </div>
+                                    <span class="eli-blank-line" style="width: 120px;"></span> <span class="eli-label" style="margin-left:10px;">Sit. Doc.:</span>
+                                    <span class="eli-fixed">AGUARDANDO PLAN.</span> </div>
                                 <div class="eli-row">
                                     <span class="eli-label">Tipo:</span>
                                     <span class="eli-value">${et.tipo_doc}</span>
@@ -564,8 +529,8 @@
                                     <div class="eli-desc-box">${et.desc}</div>
                                 </div>
                                 <div class="eli-row" style="margin-top:6px;">
-                                    <span class="eli-label">Qtd. (cm):</span>
-                                    <span class="eli-value" style="flex:0 0 60px;">${et.qtd} </span>
+                                    <span class="eli-label">Qtd:</span>
+                                    <span class="eli-value" style="flex:0 0 60px;">${et.qtd} cm</span>
                                     <span class="eli-label" style="margin-left:10px;">Eliminação:</span>
                                     <span class="eli-value">31/12/${et.ano_elim}</span>
                                 </div>
