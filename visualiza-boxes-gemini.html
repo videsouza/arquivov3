@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Boxes | Hub.Doc</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        /* --- Configurações Base --- */
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+        
+        /* Variáveis CSS para uso no Script JS (Gradientes e Cores Dinâmicas) */
+        :root {
+            --primary: #f59e0b; /* Amber 500 */
+            --border: #e2e8f0;  /* Slate 200 */
+        }
+
+        /* --- Barra de Rolagem --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ESTILOS ESPECÍFICOS DO MAPA (Não substituídos por Tailwind devido à complexidade do JS) --- */
+        
+        /* Legenda */
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+        /* Estantes */
+        .shelves-area { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .shelf {
+            background: #f8fafc; /* Slate 50 */
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px;
+            transition: all 0.2s;
+        }
+        .shelf:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-color: #cbd5e1; }
+        
+        .shelf-title {
+            text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8;
+            margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+        }
+
+        .shelf-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* 7 Colunas Fixo */
+            gap: 3px;
+        }
+
+        /* Box Individual */
+        .box-unit {
+            width: 28px; height: 28px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px; font-weight: 700; color: #64748b;
+            transition: all 0.1s ease;
+        }
+        .box-unit:hover {
+            transform: scale(1.5);
+            z-index: 50;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            font-size: 10px; color: #000;
+        }
+
+        /* Tooltip Flutuante */
+        .tooltip {
+            position: fixed; display: none; z-index: 9999;
+            background: #1e293b; color: white; /* Slate 800 */
+            padding: 12px; border-radius: 8px; font-size: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            pointer-events: none; min-width: 180px;
+            border: 1px solid #334155;
+        }
+        .tooltip-header { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fbbf24; }
+        .tooltip-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        
+        /* Spinner Loading */
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid #e2e8f0;
+            border-top-color: #f59e0b; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <div id="loading" class="fixed inset-0 bg-white/90 z-[100] hidden flex-col items-center justify-center backdrop-blur-sm">
+        <div class="spinner mb-4"></div>
+        <p class="font-serif text-slate-700 text-lg font-medium">Processando Mapa...</p>
+        <p class="text-xs text-slate-400 mt-2">Isso pode levar alguns segundos.</p>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <div class="flex h-full max-w-[1600px] mx-auto w-full shadow-2xl bg-white my-0 md:my-4 md:rounded-xl overflow-hidden border border-slate-200">
+        
+        <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="p-8 border-b border-slate-800">
+                    <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-amber-500">.Doc</span></h1>
+                    <p class="text-[10px] text-slate-400 mt-2 font-light tracking-wider uppercase">Ferramenta de Mapa</p>
+                </div>
+
+                <nav class="mt-8 px-4 space-y-2">
+                    <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-arrow-left w-5"></i> 
+                        <span class="font-medium text-sm tracking-wide">Voltar ao Hub</span>
+                    </a>
+                    
+                    <div class="px-4 py-2 text-[10px] text-slate-500 uppercase tracking-widest font-bold border-b border-slate-800 mb-2">Ações</div>
+
+                    <button onclick="location.reload()" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition flex items-center gap-3">
+                        <i class="fa-solid fa-undo w-5"></i> 
+                        <span class="font-medium text-sm">Reiniciar</span>
+                    </button>
+                    
+                    <button onclick="gerarRelatorioPDF()" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition flex items-center gap-3">
+                        <i class="fa-solid fa-print w-5"></i> 
+                        <span class="font-medium text-sm">Imprimir</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-6 border-t border-slate-800">
+                <div class="flex items-center gap-3 opacity-60">
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-bold font-serif text-xs">V</div>
+                    <div><p class="text-xs font-bold text-white">Vinicius Souza</p></div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around p-4 z-50 border-t border-slate-800">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white"><i class="fa-solid fa-arrow-left text-xl"></i><span class="text-[10px]">Voltar</span></a>
+            <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-amber-500"><i class="fa-solid fa-undo text-xl"></i><span class="text-[10px]">Novo</span></button>
+            <button onclick="gerarRelatorioPDF()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-print text-xl"></i><span class="text-[10px]">Print</span></button>
+        </div>
+
+        <main class="flex-1 flex flex-col bg-slate-50 relative overflow-hidden">
+            
+            <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center shadow-sm z-10">
+                <div>
+                    <h2 class="text-2xl font-serif text-slate-800">Visualizador de Boxes</h2>
+                    <p class="text-xs text-slate-500 font-sans mt-1">Mapeamento físico e ocupacional (Versão 2.0).</p>
+                </div>
+                <div class="hidden md:block">
+                     <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-amber-100">Beta</span>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth">
+                
+                <div id="uploadSection" class="max-w-2xl mx-auto mt-10">
+                    <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl bg-white p-10 text-center hover:border-amber-500 hover:bg-amber-50 transition-all cursor-pointer group">
+                        <input type="file" id="fileInput" accept=".xlsx, .xls" hidden>
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-100 group-hover:text-amber-600 transition text-slate-400">
+                            <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-medium text-slate-700">Importar Planilha do Arquivo</h3>
+                        <p class="text-sm text-slate-500 mt-2 mb-6 max-w-sm mx-auto">Arraste o relatório "Total de Docs. por Status" (XLS/XLSX) aqui ou clique para buscar.</p>
+                        <button id="btnSelectFile" class="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-black transition">
+                            Selecionar Arquivo
+                        </button>
+                    </div>
+                </div>
+
+                <div id="results" class="hidden space-y-8">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="text-2xl font-serif font-bold text-slate-700">7.000</div>
+                            <div class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Capacidade Total</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="text-2xl font-serif font-bold text-emerald-600" id="valOcupados">0</div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Ocupados</span>
+                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded" id="pctOcupados">0%</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="text-2xl font-serif font-bold text-rose-600" id="valVazios">0</div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Livres</span>
+                                <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="pctVazios">0%</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="text-2xl font-serif font-bold text-amber-500" id="valDocs">0</div>
+                            <div class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Total de Documentos</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm overflow-hidden">
+                        <div class="flex flex-wrap justify-center gap-4 mb-6 pb-4 border-b border-slate-100" id="legendContainer">
+                            </div>
+                        <div class="shelves-area" id="shelvesContainer">
+                            </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-serif text-lg text-slate-700 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-slate-400 text-sm"></i> Detalhamento por Tipo
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="statusGridContainer">
+                            </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO E VARIÁVEIS GLOBAIS ---
+        let relatorioDados = null; 
+        const totalBoxesEsperados = 7000;
+        
+        // Elementos DOM
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const btnSelectFile = document.getElementById('btnSelectFile');
+        const loading = document.getElementById('loading');
+        const uploadSection = document.getElementById('uploadSection');
+        const resultsDiv = document.getElementById('results');
+        const tooltip = document.getElementById('tooltip');
+
+        // --- 2. EVENT LISTENERS (INTERAÇÃO) ---
+        
+        btnSelectFile.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            fileInput.click();
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-amber-500', 'bg-amber-50');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-amber-500', 'bg-amber-50');
+            
+            if(e.dataTransfer.files.length) {
+                processarArquivo(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length) {
+                processarArquivo(e.target.files[0]);
+            }
+        });
+
+        // --- 3. PROCESSAMENTO DO ARQUIVO ---
+        function processarArquivo(file) {
+            loading.style.display = 'flex'; // Mostra loading
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    
+                    const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                    const headers = json[2]; 
+                    const rows = json.slice(3); 
+
+                    if(!headers || headers.length === 0) {
+                        throw new Error("Cabeçalho não encontrado na linha 3.");
+                    }
+                    
+                    const dadosProcessados = analisarDados(headers, rows);
+                    relatorioDados = dadosProcessados;
+                    
+                    renderizarInterface(dadosProcessados);
+
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        uploadSection.style.display = 'none';
+                        resultsDiv.classList.remove('hidden');
+                        resultsDiv.classList.add('fade-in');
+                    }, 800);
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Erro ao ler o arquivo Excel. Verifique se o formato está correto (Linha 3 com cabeçalhos).");
+                    loading.style.display = 'none';
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function analisarDados(headers, rows) {
+            const ignore = ['BOX', 'TOTAL', 'Total', 'Box', 'box'];
+            const statusCols = headers.map((h, i) => ({name: h, index: i}))
+                                      .filter(c => c.name && !ignore.includes(c.name));
+            
+            const boxes = new Array(totalBoxesEsperados + 1).fill(null);
+            let totalOcupados = 0;
+            let totalDocs = 0;
+            const statusTotals = {};
+            
+            statusCols.forEach(c => statusTotals[c.name] = 0);
+
+            rows.forEach(row => {
+                const boxNum = parseInt(row[0]); 
+                
+                if(boxNum > 0 && boxNum <= totalBoxesEsperados) {
+                    const boxData = { id: boxNum, total: 0, content: {} };
+                    
+                    statusCols.forEach(col => {
+                        const val = parseInt(row[col.index]) || 0;
+                        if(val > 0) {
+                            boxData.content[col.name] = val;
+                            boxData.total += val;
+                            statusTotals[col.name] += val;
+                        }
+                    });
+
+                    if(boxData.total > 0) {
+                        boxes[boxNum] = boxData;
+                        totalOcupados++;
+                        totalDocs += boxData.total;
+                    }
+                }
+            });
+
+            return { boxes, statusCols, statusTotals, totalOcupados, totalDocs };
+        }
+
+        // --- 4. RENDERIZAÇÃO ---
+        function renderizarInterface(dados) {
+            // A. Atualiza KPIs
+            document.getElementById('valOcupados').innerText = dados.totalOcupados.toLocaleString();
+            document.getElementById('pctOcupados').innerText = ((dados.totalOcupados / totalBoxesEsperados) * 100).toFixed(1) + '%';
+            
+            document.getElementById('valVazios').innerText = (totalBoxesEsperados - dados.totalOcupados).toLocaleString();
+            document.getElementById('pctVazios').innerText = (((totalBoxesEsperados - dados.totalOcupados) / totalBoxesEsperados) * 100).toFixed(1) + '%';
+            
+            document.getElementById('valDocs').innerText = dados.totalDocs.toLocaleString();
+
+            // B. Gera Cores e Legenda
+            const cores = gerarPaletaCores(dados.statusCols.length);
+            const mapaCores = {};
+            
+            let legendHTML = '';
+            dados.statusCols.forEach((col, i) => {
+                mapaCores[col.name] = cores[i];
+                legendHTML += `
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:${cores[i]}"></div>
+                        ${col.name}
+                    </div>`;
+            });
+            legendHTML += `<div class="legend-item"><div class="legend-dot" style="background:white; border:1px solid #ccc"></div>VAZIO</div>`;
+            document.getElementById('legendContainer').innerHTML = legendHTML;
+
+            // C. Gera Estantes e Boxes
+            const containerShelves = document.getElementById('shelvesContainer');
+            containerShelves.innerHTML = ''; 
+            
+            const boxesPorEstante = 49; // 7x7
+            const qtdEstantes = Math.ceil(totalBoxesEsperados / boxesPorEstante);
+            const fragment = document.createDocumentFragment();
+
+            for(let i=0; i < qtdEstantes; i++) {
+                const start = i * boxesPorEstante + 1;
+                const end = Math.min((i+1) * boxesPorEstante, totalBoxesEsperados);
+                
+                const shelfDiv = document.createElement('div');
+                shelfDiv.className = 'shelf';
+                shelfDiv.innerHTML = `<div class="shelf-title">${start} - ${end}</div>`;
+                
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'shelf-grid';
+
+                for(let b=start; b <= end; b++) {
+                    const boxDiv = document.createElement('div');
+                    boxDiv.className = 'box-unit';
+                    boxDiv.innerText = b; 
+
+                    const boxInfo = dados.boxes[b];
+
+                    if(boxInfo) {
+                        boxDiv.style.background = gerarBackgroundGradiente(boxInfo, mapaCores);
+                        boxDiv.style.color = '#111';
+                        boxDiv.style.fontWeight = '900';
+                        boxDiv.onmouseenter = (e) => mostrarTooltip(e, boxInfo);
+                    } else {
+                        boxDiv.style.color = '#e2e8f0'; 
+                        boxDiv.onmouseenter = (e) => mostrarTooltip(e, {id: b, total: 0});
+                    }
+                    
+                    boxDiv.onmouseleave = esconderTooltip;
+                    gridDiv.appendChild(boxDiv);
+                }
+
+                shelfDiv.appendChild(gridDiv);
+                fragment.appendChild(shelfDiv);
+            }
+            containerShelves.appendChild(fragment);
+
+            // D. Cards de Status
+            const statusContainer = document.getElementById('statusGridContainer');
+            statusContainer.innerHTML = '';
+            
+            const sortedStatus = Object.entries(dados.statusTotals).sort((a,b) => b[1] - a[1]);
+
+            sortedStatus.forEach(([nome, qtd]) => {
+                if(qtd > 0) {
+                    const pct = ((qtd / dados.totalDocs) * 100).toFixed(1);
+                    const cor = mapaCores[nome];
+                    
+                    statusContainer.innerHTML += `
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 border-l-4 shadow-sm" style="border-left-color: ${cor}">
+                            <div class="flex justify-between items-start text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                <span>${nome}</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="text-xl font-serif font-bold text-slate-700">${qtd.toLocaleString()}</div>
+                            <div class="h-1.5 w-full bg-slate-100 rounded-full mt-3 overflow-hidden">
+                                <div class="h-full rounded-full" style="width:${pct}%; background:${cor}"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // --- 5. FUNÇÕES AUXILIARES ---
+        
+        function gerarPaletaCores(quantidade) {
+            const cores = [];
+            const passo = 360 / quantidade;
+            for(let i=0; i<quantidade; i++) {
+                // Ajustado para tons mais "Pastel" e profissionais, evitando cores neon
+                cores.push(`hsl(${Math.floor(i*passo)}, 65%, 55%)`);
+            }
+            return cores;
+        }
+
+        function gerarBackgroundGradiente(box, mapaCores) {
+            const entries = Object.entries(box.content);
+            if(entries.length === 1) return mapaCores[entries[0][0]];
+
+            let stops = [];
+            let acumulado = 0;
+            
+            entries.forEach(([tipo, qtd]) => {
+                const pct = (qtd / box.total) * 100;
+                const cor = mapaCores[tipo];
+                stops.push(`${cor} ${acumulado}%`);
+                acumulado += pct;
+                stops.push(`${cor} ${acumulado}%`);
+            });
+
+            return `conic-gradient(${stops.join(', ')})`;
+        }
+
+        // --- 6. TOOLTIP ---
+        function mostrarTooltip(e, data) {
+            let html = `<div class="tooltip-header">Box ${data.id}</div>`;
+            
+            if(data.total > 0) {
+                html += `<div class="tooltip-row"><span>Total:</span> <strong class="text-amber-400">${data.total}</strong></div>`;
+                html += `<hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:8px 0;">`;
+                
+                for(const [tipo, qtd] of Object.entries(data.content)) {
+                    const pct = ((qtd/data.total)*100).toFixed(0);
+                    html += `<div class="tooltip-row text-xs">
+                                <span class="text-slate-300 mr-2">${tipo}:</span> 
+                                <span>${qtd} (${pct}%)</span>
+                             </div>`;
+                }
+            } else {
+                html += `<div style="text-align:center; color:#94a3b8; font-style:italic">Vazio / Livre</div>`;
+            }
+
+            tooltip.innerHTML = html;
+            tooltip.style.display = 'block';
+            moverTooltip(e);
+        }
+
+        function moverTooltip(e) {
+            const w = tooltip.offsetWidth;
+            const h = tooltip.offsetHeight;
+            const margin = 15;
+            
+            let x = e.clientX + margin;
+            let y = e.clientY + margin;
+
+            if(x + w > window.innerWidth) x = e.clientX - w - margin;
+            if(y + h > window.innerHeight) y = e.clientY - h - margin;
+
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+
+        function esconderTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if(tooltip.style.display === 'block') moverTooltip(e);
+        });
+
+        // --- 7. RELATÓRIO PDF (Atualizado para o novo Design) ---
+        function gerarRelatorioPDF() {
+            if(!relatorioDados) return alert("Carregue uma planilha primeiro.");
+
+            const dados = relatorioDados;
+            const sortedStatus = Object.entries(dados.statusTotals).sort((a,b) => b[1] - a[1]);
+            
+            let linhasTabela = '';
+            sortedStatus.forEach(([nome, qtd]) => {
+                if(qtd > 0) {
+                    const pct = ((qtd / dados.totalDocs) * 100).toFixed(1);
+                    linhasTabela += `
+                        <tr>
+                            <td>${nome}</td>
+                            <td class="text-right">${qtd.toLocaleString()}</td>
+                            <td class="text-right">${pct}%</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const janela = window.open('', '', 'width=900,height=800');
+            janela.document.write(`
+                <html>
+                <head>
+                    <title>Relatório de Ocupação | Hub.Doc</title>
+                    <style>
+                        body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #1e293b; }
+                        h1 { text-align: center; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 30px; font-family: serif; font-size: 28px; }
+                        .cards { display: flex; justify-content: space-between; margin-bottom: 40px; gap: 20px; }
+                        .card { background: #f8fafc; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; flex: 1; text-align: center; }
+                        .val { font-size: 24px; font-weight: bold; display: block; margin-bottom: 5px; color: #1e293b; }
+                        .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+                        th { background: #1e293b; color: white; padding: 12px; text-align: left; text-transform: uppercase; font-size: 11px; }
+                        td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+                        .text-right { text-align: right; }
+                        .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Relatório de Ocupação Física</h1>
+                    
+                    <div class="cards">
+                        <div class="card">
+                            <span class="val" style="color: #059669">${dados.totalOcupados.toLocaleString()}</span>
+                            <span class="label">Ocupados</span>
+                        </div>
+                        <div class="card">
+                            <span class="val" style="color: #e11d48">${(totalBoxesEsperados - dados.totalOcupados).toLocaleString()}</span>
+                            <span class="label">Livres</span>
+                        </div>
+                        <div class="card">
+                            <span class="val" style="color: #f59e0b">${dados.totalDocs.toLocaleString()}</span>
+                            <span class="label">Documentos</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 10px; font-family: serif;">Detalhamento por Tipo Documental</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo / Situação</th>
+                                <th class="text-right">Quantidade</th>
+                                <th class="text-right">% do Acervo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${linhasTabela}
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        Gerado em ${new Date().toLocaleString()} pelo Hub.Doc - Sistema de Gestão Documental.
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            janela.document.close();
+            setTimeout(() => {
+                janela.print();
+            }, 500);
+        }
+
+    </script>
+</body>
+</html>
