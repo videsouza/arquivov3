@@ -51,7 +51,7 @@
 
         /* --- ESTILOS DAS ETIQUETAS --- */
 
-        /* 1. ELIMINAÇÃO & PERMANENTE (Compartilham estilo) */
+        /* 1. PADRÃO (Eliminação & Permanente) */
         .layout-padrao-box {
             border: 2px solid #000; height: 100%; 
             padding: 8px; 
@@ -72,7 +72,6 @@
         }
         .eli-blank-line { border-bottom: 1px solid #000; display: inline-block; height: 14px; margin-left: 5px; }
         
-        /* Texto Fixo Forte (Preto Puro) */
         .eli-fixed { 
             font-size: 11px; font-weight: 800; color: #000000 !important; text-transform: uppercase;
         }
@@ -195,7 +194,7 @@
                                 </div>
                                 <div class="w-1/2">
                                     <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">Qtd (cm)</label>
-                                    <input type="number" id="eli_qtd" class="w-full border p-2 rounded text-xs">
+                                    <input type="number" id="eli_qtd" class="w-full border p-2 rounded text-xs" placeholder="Deixe vazio para manual">
                                 </div>
                             </div>
                             
@@ -251,14 +250,14 @@
     </main>
 
     <script>
-        // --- BASE DE DADOS COMPLETA (Copiar lista completa aqui) ---
+        // --- BANCO DE DADOS COMPLETO (Copiar lista completa aqui) ---
         const BASE_SETORES = [
             {c:1,n:"SE - DAF - COORDENADORIA DE INFORMÁTICA"},{c:2,n:"CORPO DE BOMBEIROS"},{c:3,n:"CRECHE JARDIM CASTANHEIRAS"},
             {c:4,n:"CRECHE JARDIM FLAMBOYANT"},{c:5,n:"CRECHE JARDIM TELESPARK"},{c:6,n:"EMEF PROF ANA BERLING DE MACEDO"},
             {c:7,n:"EMEF PROF ANTÔNIO PALMA SOBRINHO"},{c:8,n:"EMEF DOM PEDRO ALCÂNTARA - CAIC"},{c:9,n:"EMEF PROF HOMERA DA SILVA BRAGA"},
             {c:2288,n:"SEC - DEPARTAMENTO DE GESTÃO DE PROJETOS ESPECIAIS (DGPE)"},
             {c:9999,n:"ARQUIVO GERAL"} 
-            // ... (Mantenha a lista completa que você já tem no seu arquivo)
+            // ... (Use a lista completa fornecida anteriormente)
         ];
 
         let etiquetas = [];
@@ -377,26 +376,47 @@
 
                 if(et.tipo === 'padrao') {
                     
-                    // --- LAYOUTS COMPARTILHADOS (Eliminação / Permanente) ---
                     if(et.subtipo === 'eliminacao' || et.subtipo === 'permanente') {
                         
                         let titulo = "ELIMINAÇÃO";
-                        let sitDoc = "AGUARDANDO PLAN.";
+                        let rowSitDoc = "";
+                        
+                        // LÓGICA DE QTD (ESPAÇO MANUAL)
+                        // Se existir valor, mostra valor. Se vazio, mostra linha de preenchimento.
+                        const valQtd = et.qtd ? et.qtd : "_______";
+
                         let rodapeHtml = `
                             <div class="eli-row" style="margin-top:6px;">
                                 <span class="eli-label">Qtd:</span>
-                                <span class="eli-value" style="flex:0 0 60px;">${et.qtd} cm</span>
+                                <span class="eli-value" style="flex:0 0 80px;">${valQtd} cm</span>
                                 <span class="eli-label" style="margin-left:10px;">Eliminação:</span>
                                 <span class="eli-value">31/12/${et.ano_elim}</span>
                             </div>`;
 
-                        if(et.subtipo === 'permanente') {
+                        // CONDICIONAIS DE TIPO
+                        if(et.subtipo === 'eliminacao') {
+                            rowSitDoc = `
+                                <div class="eli-row">
+                                    <span class="eli-label">Código:</span>
+                                    <span class="eli-blank-line" style="width: 120px;"></span>
+                                    <span class="eli-label" style="margin-left:10px;">Sit. Doc.:</span>
+                                    <span class="eli-fixed">AGUARDANDO PLAN.</span>
+                                </div>
+                            `;
+                        } else {
+                            // PERMANENTE
                             titulo = "GUARDA PERMANENTE";
-                            sitDoc = "GUARDA PERMANENTE";
+                            // Apenas o Código, sem Sit. Doc
+                            rowSitDoc = `
+                                <div class="eli-row">
+                                    <span class="eli-label">Código:</span>
+                                    <span class="eli-blank-line" style="width: 120px;"></span>
+                                </div>
+                            `;
                             rodapeHtml = `
                                 <div class="eli-row" style="margin-top:6px;">
                                     <span class="eli-label">Qtd:</span>
-                                    <span class="eli-value" style="flex:0 0 60px;">${et.qtd} cm</span>
+                                    <span class="eli-value" style="flex:0 0 80px;">${valQtd} cm</span>
                                 </div>`;
                         }
 
@@ -418,12 +438,9 @@
                                     <span class="eli-label">Destinatário:</span>
                                     <span class="eli-fixed">1344 – SEC. MUNICIPAL DE EDUCAÇÃO</span>
                                 </div>
-                                <div class="eli-row">
-                                    <span class="eli-label">Código:</span>
-                                    <span class="eli-blank-line" style="width: 120px;"></span>
-                                    <span class="eli-label" style="margin-left:10px;">Sit. Doc.:</span>
-                                    <span class="eli-fixed">${sitDoc}</span>
-                                </div>
+                                
+                                ${rowSitDoc}
+
                                 <div class="eli-row">
                                     <span class="eli-label">Tipo:</span>
                                     <span class="eli-value">${et.tipo_doc}</span>
