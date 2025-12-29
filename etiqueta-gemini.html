@@ -121,6 +121,9 @@
 </head>
 <body class="flex h-screen">
 
+    <datalist id="lista-setores">
+        </datalist>
+
     <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex no-print h-full shrink-0">
         <div>
             <div class="p-8 border-b border-slate-800">
@@ -172,12 +175,7 @@
                     <div id="campos-padrao">
                         <div class="mb-3">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Unidade/Setor</label>
-                            <div class="flex gap-2 mb-2">
-                                <select id="select_unidade_padrao" onchange="aplicarSetor('p_unidade', this.value)" class="w-full border p-2 rounded text-sm bg-slate-50 focus:border-amber-500 outline-none">
-                                    <option value="">-- Seleção Rápida --</option>
-                                </select>
-                            </div>
-                            <input type="text" id="p_unidade" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none" placeholder="Digite ou selecione acima...">
+                            <input type="text" id="p_unidade" list="lista-setores" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none" placeholder="Digite para buscar...">
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div>
@@ -202,12 +200,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Setor</label>
-                            <div class="flex gap-2 mb-2">
-                                <select id="select_unidade_numero" onchange="aplicarSetor('n_setor', this.value)" class="w-full border p-2 rounded text-sm bg-slate-50 focus:border-amber-500 outline-none">
-                                    <option value="">-- Seleção Rápida --</option>
-                                </select>
-                            </div>
-                            <input type="text" id="n_setor" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none font-bold uppercase" placeholder="Digite ou selecione...">
+                            <input type="text" id="n_setor" list="lista-setores" class="w-full border p-2 rounded text-sm focus:border-amber-500 outline-none font-bold uppercase" placeholder="Digite para buscar...">
                         </div>
                         <div class="mb-3">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data/Ano</label>
@@ -270,22 +263,12 @@
         };
 
         function carregarSetores() {
-            const selects = ['select_unidade_padrao', 'select_unidade_numero'];
-            selects.forEach(id => {
-                const el = document.getElementById(id);
-                SETORES.forEach(setor => {
-                    const option = document.createElement('option');
-                    option.value = setor;
-                    option.text = setor;
-                    el.appendChild(option);
-                });
+            const dataList = document.getElementById('lista-setores');
+            SETORES.forEach(setor => {
+                const option = document.createElement('option');
+                option.value = setor;
+                dataList.appendChild(option);
             });
-        }
-
-        function aplicarSetor(inputId, valor) {
-            if(valor) {
-                document.getElementById(inputId).value = valor;
-            }
         }
 
         function setModelo(m) {
