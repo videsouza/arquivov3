@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub de Serviços | Início</title>
+    <title>Hub de Serviços | Gestão Documental</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -16,8 +16,8 @@
                     colors: {
                         primary: '#f7931e', // Laranja Hub
                         'primary-hover': '#d67d12',
-                        dark: '#1f2937', // Sidebar Dark
-                        light: '#f3f4f6' // Background
+                        dark: '#1f2937', // Cinza Escuro Sidebar
+                        light: '#f3f4f6' // Fundo Geral
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -29,7 +29,7 @@
     </script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; }
         
         /* Scrollbar personalizada */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -41,181 +41,185 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="flex h-screen text-gray-800 overflow-hidden">
+<body class="bg-light text-gray-800 h-screen flex flex-col overflow-hidden">
 
-    <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex h-full shrink-0 shadow-xl z-30">
-        <div>
-            <div class="p-8 border-b border-gray-700">
-                <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
-                <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Central de Serviços</p>
-            </div>
-            
-            <nav class="mt-8 px-4 space-y-2">
-                <a href="#" class="w-full text-left px-4 py-3 rounded bg-gray-800 border-l-4 border-primary text-white shadow-lg transition flex items-center gap-3">
-                    <i class="fa-solid fa-grid-2 text-primary w-5"></i> <span class="font-medium text-sm">Dashboard</span>
-                </a>
-
-                <a href="#" class="w-full text-left px-4 py-3 rounded hover:bg-gray-800 border-l-4 border-transparent hover:border-gray-600 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-folder-open w-5"></i> <span class="font-medium text-sm">Meus Documentos</span>
-                </a>
-                <a href="#" class="w-full text-left px-4 py-3 rounded hover:bg-gray-800 border-l-4 border-transparent hover:border-gray-600 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-users w-5"></i> <span class="font-medium text-sm">Equipe</span>
-                </a>
-                <a href="#" class="w-full text-left px-4 py-3 rounded hover:bg-gray-800 border-l-4 border-transparent hover:border-gray-600 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-gear w-5"></i> <span class="font-medium text-sm">Configurações</span>
-                </a>
-            </nav>
-        </div>
+    <div class="flex h-full w-full bg-white overflow-hidden">
         
-        <div class="p-6 border-t border-gray-700 bg-gray-900/50">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs">
-                    SV
+        <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex shrink-0 shadow-xl z-30">
+            <div>
+                <div class="p-8 border-b border-gray-700">
+                    <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
+                    <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Central de Inteligência</p>
                 </div>
-                <div>
-                    <p class="text-xs font-bold text-white">Servidor Público</p>
-                    <p class="text-[10px] text-gray-400">SME - Educação</p>
+
+                <nav class="mt-8 px-4 space-y-3">
+                    
+                    <button class="w-full text-left px-4 py-3 rounded bg-gray-800 border-l-4 border-primary text-white shadow-lg flex items-center gap-3 transition-all">
+                        <i class="fa-solid fa-toolbox w-5 text-primary"></i> 
+                        <span class="font-medium text-sm tracking-wide">Ferramentas</span>
+                    </button>
+
+                    <a href="https://sistema-arquivos-app.onrender.com/" class="w-full text-left px-4 py-3 rounded border-l-4 border-transparent hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3 group">
+                        <i class="fa-solid fa-network-wired w-5 group-hover:text-primary transition"></i>
+                        <span class="font-medium text-sm tracking-wide">Fluxo de Trabalho</span>
+                    </a>
+                    
+                    <button class="w-full text-left px-4 py-3 rounded border-l-4 border-transparent hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3 group">
+                         <i class="fa-regular fa-circle-question w-5 group-hover:text-primary transition"></i>
+                        <span class="font-medium text-sm tracking-wide">Suporte</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="p-6 border-t border-gray-700 bg-gray-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-dark font-bold font-serif shadow-lg">V</div>
+                    <div>
+                        <p class="text-xs font-bold text-white tracking-wide">Vinicius Souza</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Admin</p>
+                    </div>
                 </div>
             </div>
-            <button class="w-full py-2 text-xs text-gray-400 hover:text-white border border-gray-600 rounded hover:bg-gray-700 transition">
-                <i class="fa-solid fa-sign-out-alt mr-1"></i> Sair do Sistema
+        </aside>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-dark text-white flex justify-around p-4 z-50 border-t border-gray-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+            <button class="flex flex-col items-center gap-1 text-primary">
+                <i class="fa-solid fa-toolbox text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Ferramentas</span>
+            </button>
+            
+            <a href="https://sistema-arquivos-app.onrender.com/" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-network-wired text-xl mb-1"></i>
+                <span class="text-[10px]">Fluxo</span>
+            </a>
+
+            <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition">
+                <i class="fa-regular fa-circle-question text-xl mb-1"></i>
+                <span class="text-[10px]">Ajuda</span>
             </button>
         </div>
-    </aside>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-light relative">
-        
-        <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center shadow-sm z-10 shrink-0 h-20">
-            <div>
-                <h2 class="text-2xl font-serif font-bold text-gray-800">Painel de Controle</h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Bem-vindo ao sistema de gestão documental unificado.</p>
-            </div>
+        <main class="flex-1 flex flex-col bg-light relative overflow-hidden">
             
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden sm:block">
-                    <p class="text-xs font-bold text-gray-700" id="data-atual">Carregando data...</p>
-                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">São José dos Campos</p>
+            <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center shadow-sm z-10 h-20 shrink-0">
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
+                        <i class="fa-solid fa-toolbox text-primary text-xl"></i>
+                        Ferramentas
+                    </h2>
+                    <p class="text-xs text-gray-500 font-sans mt-1 md:ml-8 ml-0">Acesso rápido a todos os módulos do sistema.</p>
                 </div>
-                <button class="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 text-gray-500 hover:text-primary hover:border-primary transition flex items-center justify-center relative">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-            </div>
-        </header>
+                <div class="md:hidden text-2xl font-light text-gray-800">Hub<span class="font-bold text-primary">.Doc</span></div>
+            </header>
 
-        <div class="flex-1 overflow-y-auto p-8 fade-in">
-            
-            <div class="max-w-6xl mx-auto">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth">
                 
-                <div class="mb-8 flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Acesso Rápido</h3>
-                    <span class="h-px bg-gray-200 flex-1 ml-4"></span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-                    <a href="etiquetas.html" class="group bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden ring-1 ring-transparent hover:ring-primary/20">
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary group-hover:w-2 transition-all"></div>
-                        
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                    
+                    <a href="super-analista.html" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-transparent hover:ring-blue-500/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-blue-600 transition-all group-hover:w-1.5"></div>
                         <div class="flex justify-between items-start mb-4 pl-2">
-                            <div class="w-12 h-12 rounded-lg bg-orange-50 text-primary flex items-center justify-center text-xl group-hover:scale-110 transition">
-                                <i class="fa-solid fa-tags"></i>
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-chart-pie text-lg"></i>
                             </div>
-                            <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Online</span>
+                            <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Essencial</span>
                         </div>
-                        
                         <div class="pl-2">
-                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-primary transition">Gerador de Etiquetas</h4>
-                            <p class="text-xs text-gray-500 mb-6 leading-relaxed">
-                                Criação padronizada de etiquetas para eliminação, guarda permanente e amostragem.
-                            </p>
-                            <span class="text-xs font-bold text-primary flex items-center gap-2 group-hover:gap-3 transition-all">
-                                Acessar Ferramenta <i class="fa-solid fa-arrow-right"></i>
-                            </span>
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-blue-700 transition">Análise de Dados</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Dashboard analítico com insights automáticos gerados a partir de planilhas.</p>
+                            <div class="flex items-center text-xs font-bold text-blue-600 uppercase tracking-wide mt-auto">
+                                Acessar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
                         </div>
                     </a>
 
-                    <div class="group bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative opacity-75 hover:opacity-100">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center text-xl group-hover:bg-gray-200 transition">
-                                <i class="fa-solid fa-file-signature"></i>
+                    <a href="otimizador-eliminacao.html" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-transparent hover:ring-emerald-500/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-600 transition-all group-hover:w-1.5"></div>
+                        <div class="flex justify-between items-start mb-4 pl-2">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-layer-group text-lg"></i>
                             </div>
-                            <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Em Breve</span>
+                            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Novo</span>
                         </div>
-                        
-                        <h4 class="text-lg font-serif font-bold text-gray-700 mb-2">Protocolo Digital</h4>
-                        <p class="text-xs text-gray-500 mb-4 leading-relaxed">
-                            Envio e rastreamento de documentos internos e externos.
-                        </p>
-                    </div>
+                        <div class="pl-2">
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-emerald-700 transition">Otimizador de Lotes</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Algoritmo para maximizar o número de caixas em blocos de eliminação.</p>
+                            <div class="flex items-center text-xs font-bold text-emerald-600 uppercase tracking-wide mt-auto">
+                                Otimizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </a>
 
-                    <div class="group bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative opacity-75 hover:opacity-100">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center text-xl group-hover:bg-gray-200 transition">
-                                <i class="fa-solid fa-box-archive"></i>
+                    <a href="etiqueta-gemini.html" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-orange-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-transparent hover:ring-primary/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-primary transition-all group-hover:w-1.5"></div>
+                        <div class="flex justify-between items-start mb-4 pl-2">
+                            <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-print text-lg"></i>
                             </div>
-                            <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Em Breve</span>
                         </div>
-                        
-                        <h4 class="text-lg font-serif font-bold text-gray-700 mb-2">Arquivo Geral</h4>
-                        <p class="text-xs text-gray-500 mb-4 leading-relaxed">
-                            Consulta de caixas e localização de documentos arquivados.
-                        </p>
-                    </div>
+                        <div class="pl-2">
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-primary transition">Gerador de Etiquetas</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Criação automática de etiquetas (9x9cm) em layout A4 para impressão.</p>
+                            <div class="flex items-center text-xs font-bold text-primary uppercase tracking-wide mt-auto">
+                                Gerar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </a>
 
-                    <div class="group bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative">
-                         <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-gray-100 to-transparent rounded-bl-full -mr-8 -mt-8"></div>
-                        
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center text-xl">
-                                <i class="fa-solid fa-network-wired"></i>
+                    <a href="visualiza-boxes-gemini.html" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-purple-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-transparent hover:ring-purple-500/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-purple-600 transition-all group-hover:w-1.5"></div>
+                        <div class="flex justify-between items-start mb-4 pl-2">
+                            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-th text-lg"></i>
                             </div>
-                            <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1">
-                                <i class="fa-solid fa-flask"></i> Beta
-                            </span>
                         </div>
-                        
-                        <h4 class="text-lg font-serif font-bold text-gray-800 mb-2">Gestão de Fluxo</h4>
-                        <p class="text-xs text-gray-500 mb-4 leading-relaxed">
-                            Mapeamento de processos e ciclo de vida documental.
-                        </p>
-                        <span class="text-xs font-bold text-gray-400 uppercase cursor-not-allowed">Acesso Restrito</span>
-                    </div>
+                        <div class="pl-2">
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-purple-700 transition">Mapa de Ocupação</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Visualização interativa (Heatmap) do status físico do arquivo.</p>
+                            <div class="flex items-center text-xs font-bold text-purple-600 uppercase tracking-wide mt-auto">
+                                Visualizar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://corretor-datas.onrender.com/" target="_blank" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-amber-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-transparent hover:ring-amber-500/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-amber-500 transition-all group-hover:w-1.5"></div>
+                        <div class="flex justify-between items-start mb-4 pl-2">
+                            <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-calendar-check text-lg"></i>
+                            </div>
+                            <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1"><i class="fas fa-cloud"></i> Web</span>
+                        </div>
+                        <div class="pl-2">
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition">Auditor de Datas</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Validação automática de temporalidade comparando planilhas contra tabelas PDF.</p>
+                            <div class="flex items-center text-xs font-bold text-amber-600 uppercase tracking-wide mt-auto">
+                                Auditar <i class="fas fa-external-link-alt ml-2 text-[10px] group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://sistema-arquivos-app.onrender.com/" target="_blank" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-gray-900/5 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden opacity-90 hover:opacity-100 ring-1 ring-transparent hover:ring-gray-500/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-gray-400 transition-all group-hover:w-1.5"></div>
+                        <div class="flex justify-between items-start mb-4 pl-2">
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-gray-600 group-hover:text-white transition shadow-sm">
+                                <i class="fas fa-network-wired text-lg"></i>
+                            </div>
+                             <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1"><i class="fas fa-flask"></i> Beta</span>
+                        </div>
+                        <div class="pl-2">
+                            <h4 class="text-lg font-serif font-bold text-gray-800 mb-2 group-hover:text-gray-700 transition">Gestão de Fluxo</h4>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">Controle completo do ciclo de vida documental e rastreabilidade.</p>
+                            <div class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wide mt-auto">
+                                Acessar <i class="fas fa-external-link-alt ml-2 text-[10px] group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </a>
 
                 </div>
-
-                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-dark rounded-lg p-6 text-white relative overflow-hidden">
-                        <i class="fa-solid fa-chart-pie absolute -right-4 -bottom-4 text-8xl text-white opacity-5"></i>
-                        <p class="text-xs text-gray-400 uppercase mb-1">Total de Etiquetas Geradas</p>
-                        <h3 class="text-3xl font-bold text-primary">1.248</h3>
-                        <p class="text-[10px] text-gray-400 mt-2">Neste mês</p>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-lg p-6 relative">
-                        <p class="text-xs text-gray-500 uppercase mb-1">Status do Sistema</p>
-                        <h3 class="text-xl font-bold text-green-600 flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> Operacional</h3>
-                        <p class="text-[10px] text-gray-400 mt-2">Última verificação: Agora</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-6 text-white relative">
-                        <h3 class="text-lg font-bold mb-2">Precisa de Ajuda?</h3>
-                        <p class="text-xs opacity-90 mb-4">Acesse os tutoriais ou abra um chamado no suporte técnico.</p>
-                        <button class="bg-white text-primary text-xs font-bold px-3 py-2 rounded shadow hover:bg-gray-100 transition">Suporte</button>
-                    </div>
-                </div>
-
             </div>
-            
-            <footer class="mt-12 border-t border-gray-200 pt-6 pb-2 text-center">
-                <p class="text-[10px] text-gray-400">Desenvolvido para Secretaria Municipal de Educação &copy; 2025</p>
-            </footer>
+        </main>
+    </div>
 
-        </div>
-    </main>
-
-    <script>
-        // Script simples para data atual
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR', options);
-    </script>
 </body>
 </html>
