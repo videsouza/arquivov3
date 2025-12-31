@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Analista | Hub.Doc</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.8.0/simple-statistics.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f7931e',
+                        'primary-hover': '#d67d12',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animações e Scrollbar */
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Dropzone Animado */
+        .drop-active { border-color: #f7931e !important; background-color: #fff7ed !important; transform: scale(1.02); }
+    </style>
+</head>
+<body class="flex h-screen text-gray-800 overflow-hidden">
+
+    <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex h-full shrink-0 shadow-xl z-30">
+        <div>
+            <div class="p-8 border-b border-gray-700">
+                <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
+                <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Inteligência de Dados</p>
+            </div>
+            
+            <nav class="mt-8 px-4 space-y-3">
+                <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-gray-600 hover:bg-gray-700 text-gray-300 hover:text-white transition flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
+                </a>
+
+                <div class="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest font-bold border-b border-gray-700 mb-2">Ações</div>
+                
+                <button onclick="document.getElementById('file-input').click()" class="w-full text-left px-4 py-3 rounded bg-primary hover:bg-primary-hover text-white shadow-lg transition flex items-center gap-3">
+                    <i class="fa-solid fa-upload w-5"></i> <span class="font-medium text-sm">Nova Planilha</span>
+                </button>
+                
+                <button onclick="window.print()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-print w-5"></i> <span class="font-medium text-sm">Imprimir Relatório</span>
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-6 border-t border-gray-700 bg-gray-900/50">
+            <p class="text-[10px] text-gray-500 text-center">
+                Módulo de Análise Estatística<br>v2.0 &copy; 2025
+            </p>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-light relative">
+        
+        <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center shadow-sm z-10 shrink-0 h-20">
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fa-solid fa-chart-pie text-primary text-xl"></i> Super Analista
+                </h2>
+                <p class="text-xs text-gray-500 font-sans mt-1">Importe suas planilhas para gerar insights automáticos.</p>
+            </div>
+            <div class="flex gap-2">
+                 <span id="file-name-display" class="hidden px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200 flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-green-600"></i> <span class="font-bold">arquivo.xlsx</span>
+                 </span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth relative">
+            
+            <div id="upload-screen" class="max-w-2xl mx-auto mt-10 text-center fade-in">
+                
+                <div id="drop-zone" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-12 transition-all cursor-pointer hover:border-primary hover:bg-orange-50/30 group shadow-sm">
+                    <div class="w-20 h-20 bg-orange-100 text-primary rounded-full flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Arraste sua planilha aqui</h3>
+                    <p class="text-sm text-gray-400 mb-6">Suporta arquivos .xlsx, .xls ou .csv</p>
+                    
+                    <button class="bg-dark text-white px-8 py-3 rounded-lg font-bold hover:bg-black transition shadow-lg flex items-center gap-2 mx-auto">
+                        <i class="fa-solid fa-folder-open"></i> Selecionar Arquivo
+                    </button>
+                    <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="hidden">
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mt-8 opacity-60">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <i class="fa-solid fa-bolt text-yellow-500 text-2xl mb-2"></i>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase">Análise Rápida</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <i class="fa-solid fa-chart-line text-blue-500 text-2xl mb-2"></i>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase">Tendências</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <i class="fa-solid fa-file-export text-green-500 text-2xl mb-2"></i>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase">Relatórios</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard-area" class="hidden fade-in space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-1 flex gap-1 overflow-x-auto sticky top-0 z-20">
+                    <button class="tab-btn flex-1 py-3 px-4 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-primary transition active-tab bg-primary text-white shadow" onclick="switchTab('tab-overview', this)">
+                        <i class="fa-solid fa-binoculars mr-2"></i> VISÃO GERAL
+                    </button>
+                    <button class="tab-btn flex-1 py-3 px-4 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-primary transition" onclick="switchTab('tab-temporal', this)">
+                        <i class="fa-regular fa-calendar-alt mr-2"></i> TEMPORAL
+                    </button>
+                    <button class="tab-btn flex-1 py-3 px-4 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-primary transition" onclick="switchTab('tab-distrib', this)">
+                        <i class="fa-solid fa-chart-bar mr-2"></i> DISTRIBUIÇÃO
+                    </button>
+                    <button class="tab-btn flex-1 py-3 px-4 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-primary transition" onclick="switchTab('tab-correl', this)">
+                        <i class="fa-solid fa-project-diagram mr-2"></i> CORRELAÇÕES
+                    </button>
+                </div>
+
+                <div id="tab-overview" class="tab-content active space-y-6">
+                    <div id="kpi-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                    <div id="overview-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+                </div>
+
+                <div id="tab-temporal" class="tab-content hidden">
+                    <div id="temporal-charts" class="grid grid-cols-1 gap-6"></div>
+                </div>
+
+                <div id="tab-distrib" class="tab-content hidden">
+                    <div id="distrib-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+                </div>
+
+                <div id="tab-correl" class="tab-content hidden">
+                    <div id="correl-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+                </div>
+            </div>
+
+            <div id="loader" class="hidden fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+                <p class="mt-4 text-sm font-bold text-gray-500 animate-pulse">Processando dados...</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- Elementos DOM ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadScreen = document.getElementById('upload-screen');
+        const dashboardArea = document.getElementById('dashboard-area');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const loader = document.getElementById('loader');
+
+        // --- Eventos de Drag & Drop ---
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drop-active'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drop-active'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drop-active');
+            if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) processFile(e.target.files[0]);
+        });
+
+        // --- Processamento de Arquivo ---
+        function processFile(file) {
+            loader.classList.remove('hidden');
+            fileNameDisplay.innerHTML = `<i class="fa-solid fa-file-excel text-green-600"></i> <span class="font-bold">${file.name}</span>`;
+            fileNameDisplay.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+                
+                generateDashboard(jsonData);
+                
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    uploadScreen.classList.add('hidden');
+                    dashboardArea.classList.remove('hidden');
+                }, 800);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- Geração do Dashboard ---
+        function generateDashboard(data) {
+            if (!data || data.length === 0) return alert("Planilha vazia!");
+
+            // Limpar containers
+            ['kpi-grid','overview-charts','temporal-charts','distrib-charts','correl-charts'].forEach(id => document.getElementById(id).innerHTML = '');
+
+            const headers = Object.keys(data[0]);
+            const analysis = analyzeColumns(data, headers);
+
+            // 1. Gerar KPIs
+            generateKPI(document.getElementById('kpi-grid'), 'Total de Registros', data.length, 'fa-list');
+            generateKPI(document.getElementById('kpi-grid'), 'Colunas Analisadas', headers.length, 'fa-table');
+            
+            // Tenta encontrar colunas numéricas para somar ou calcular média
+            const numCols = analysis.filter(c => c.type === 'number');
+            if(numCols.length > 0) {
+                const bestCol = numCols[0];
+                const sum = ss.sum(bestCol.values);
+                generateKPI(document.getElementById('kpi-grid'), `Soma (${bestCol.name})`, sum.toLocaleString(), 'fa-calculator');
+                generateKPI(document.getElementById('kpi-grid'), `Média (${bestCol.name})`, ss.mean(bestCol.values).toFixed(2), 'fa-divide');
+            }
+
+            // 2. Gerar Gráficos por Tipo de Coluna
+            analysis.forEach(col => {
+                if (col.type === 'category' && col.uniqueCount <= 20) {
+                    // Gráfico de Barras/Pizza para categorias
+                    const counts = {};
+                    col.values.forEach(v => counts[v] = (counts[v] || 0) + 1);
+                    const labels = Object.keys(counts);
+                    const vals = Object.values(counts);
+                    
+                    addChart(document.getElementById('overview-charts'), `Distribuição: ${col.name}`, 'bar', labels, vals);
+                    addChart(document.getElementById('distrib-charts'), `Proporção: ${col.name}`, 'doughnut', labels, vals);
+                }
+                
+                if (col.type === 'date') {
+                    // Linha do tempo
+                    const dateCounts = {};
+                    col.values.forEach(d => {
+                        const key = d.toISOString().split('T')[0].substring(0, 7); // Agrupar por Mês
+                        dateCounts[key] = (dateCounts[key] || 0) + 1;
+                    });
+                    const sortedKeys = Object.keys(dateCounts).sort();
+                    const vals = sortedKeys.map(k => dateCounts[k]);
+                    
+                    addChart(document.getElementById('temporal-charts'), `Evolução Temporal: ${col.name}`, 'line', sortedKeys, vals, true);
+                }
+            });
+        }
+
+        // --- Análise de Tipos de Coluna ---
+        function analyzeColumns(data, headers) {
+            return headers.map(header => {
+                const values = data.map(row => row[header]).filter(v => v !== "" && v !== undefined);
+                let type = 'text';
+                
+                // Heurística simples de tipo
+                const isNumber = values.every(v => !isNaN(Number(v)));
+                const isDate = values.every(v => !isNaN(Date.parse(v)) && isNaN(Number(v))); // Simples
+                
+                let parsedValues = values;
+                if (isNumber) {
+                    type = 'number';
+                    parsedValues = values.map(v => Number(v));
+                } else if (isDate) {
+                    type = 'date';
+                    parsedValues = values.map(v => new Date(v));
+                } else {
+                    type = 'category';
+                }
+
+                return {
+                    name: header,
+                    type: type,
+                    values: parsedValues,
+                    uniqueCount: new Set(values).size
+                };
+            });
+        }
+
+        // --- Componentes UI (KPIs e Gráficos com Classes Tailwind) ---
+        
+        function generateKPI(container, title, value, icon) {
+            container.insertAdjacentHTML('beforeend', `
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${title}</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${value}</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-primary text-lg">
+                        <i class="fa-solid ${icon}"></i>
+                    </div>
+                </div>
+            `);
+        }
+
+        function addChart(container, title, type, labels, data, fullWidth = false) {
+            const id = 'c_' + Math.random().toString(36).substr(2,9);
+            const colClass = fullWidth ? 'col-span-1 lg:col-span-full' : 'col-span-1';
+            
+            container.insertAdjacentHTML('beforeend', `
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative ${colClass}">
+                    <h4 class="text-sm font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">${title}</h4>
+                    <div class="h-64 w-full relative">
+                        <canvas id="${id}"></canvas>
+                    </div>
+                </div>
+            `);
+
+            setTimeout(() => {
+                const ctx = document.getElementById(id).getContext('2d');
+                new Chart(ctx, {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Qtd',
+                            data: data,
+                            backgroundColor: type === 'line' ? 'rgba(247, 147, 30, 0.1)' : ['#f7931e', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b'],
+                            borderColor: '#f7931e',
+                            borderWidth: 2,
+                            fill: type === 'line',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: type === 'doughnut' } // Só mostra legenda se for pizza/doughnut
+                        },
+                        scales: {
+                            y: { display: type !== 'doughnut' },
+                            x: { display: type !== 'doughnut' }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // --- Navegação de Abas ---
+        function switchTab(tabId, btn) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Remove estilo ativo de todos os botões
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-primary', 'text-white', 'shadow');
+                el.classList.add('text-gray-500', 'hover:bg-gray-50');
+            });
+
+            // Ativa aba e botão selecionado
+            document.getElementById(tabId).classList.remove('hidden');
+            btn.classList.remove('text-gray-500', 'hover:bg-gray-50');
+            btn.classList.add('bg-primary', 'text-white', 'shadow');
+        }
+    </script>
+</body>
+</html>
