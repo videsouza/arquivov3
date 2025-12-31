@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimizador de Eliminação | Hub.Doc</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f7931e',
+                        'primary-hover': '#d67d12',
+                        dark: '#1f2937',
+                        light: '#f3f4f6',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilos de Estado Ativo para JS */
+        .obj-card.active { border-color: #f7931e; background-color: #fff7ed; ring: 1px solid #f7931e; }
+        
+        /* Toggles Customizados */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #f7931e;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #f7931e;
+        }
+        .toggle-checkbox:checked + .toggle-label:before {
+            transform: translateX(100%);
+        }
+        
+        .drop-active { border-color: #f7931e !important; background-color: #fff7ed !important; transform: scale(1.02); }
+        .upload-success { border-color: #10b981 !important; background-color: #ecfdf5 !important; }
+    </style>
+</head>
+<body class="flex h-screen text-gray-800 overflow-hidden">
+
+    <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex h-full shrink-0 shadow-xl z-30">
+        <div>
+            <div class="p-8 border-b border-gray-700">
+                <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
+                <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Gestão de Eliminação</p>
+            </div>
+            
+            <nav class="mt-8 px-4 space-y-3">
+                <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-gray-600 hover:bg-gray-700 text-gray-300 hover:text-white transition flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
+                </a>
+
+                <div class="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest font-bold border-b border-gray-700 mb-2">Ações</div>
+                
+                <button onclick="location.reload()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
+                    <i class="fa-solid fa-undo w-5"></i> <span class="font-medium text-sm">Reiniciar Processo</span>
+                </button>
+                
+                <button onclick="exportarExcel()" class="w-full text-left px-4 py-3 rounded bg-primary hover:bg-primary-hover text-white shadow-lg transition flex items-center gap-3 mt-4">
+                    <i class="fa-solid fa-download w-5"></i> <span class="font-medium text-sm">Baixar Resultado</span>
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-6 border-t border-gray-700 bg-gray-900/50">
+            <p class="text-[10px] text-gray-500 text-center">
+                Algoritmo de Otimização v3.0<br>&copy; 2025
+            </p>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-light relative">
+        
+        <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center shadow-sm z-10 shrink-0 h-20">
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fa-solid fa-cubes text-primary text-xl"></i> Otimizador de Lotes
+                </h2>
+                <p class="text-xs text-gray-500 font-sans mt-1">Algoritmo seguro com leitura multi-abas e cross-check de totais.</p>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth relative">
+            
+            <div id="uploadSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mt-4 fade-in">
+                
+                <div id="dropElim" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary hover:bg-orange-50/30 transition-all group relative">
+                    <span class="absolute top-4 left-4 bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Passo 1</span>
+                    <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:scale-110 transition" id="iconBoxElim">
+                        <i class="fa-solid fa-file-alt" id="iconElim"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-700">Relatório de Elimináveis</h3>
+                    <p class="text-xs text-gray-400 mb-4">Arquivo contendo os documentos a eliminar (Lê todas as abas)</p>
+                    <button onclick="document.getElementById('fileElim').click()" class="text-xs font-bold text-primary hover:underline">Selecionar Arquivo</button>
+                    <div id="nameElim" class="mt-2 text-xs font-bold text-success"></div>
+                    <input type="file" id="fileElim" accept=".xlsx,.xls,.csv" hidden>
+                </div>
+
+                <div id="dropTot" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary hover:bg-orange-50/30 transition-all group relative">
+                    <span class="absolute top-4 left-4 bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Passo 2</span>
+                    <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:scale-110 transition" id="iconBoxTot">
+                        <i class="fa-solid fa-calculator" id="iconTot"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-700">Totais por Box (Cross-Check)</h3>
+                    <p class="text-xs text-gray-400 mb-4">Planilha de validação (Box na Col A, Total na Col I)</p>
+                    <button onclick="document.getElementById('fileTot').click()" class="text-xs font-bold text-primary hover:underline">Selecionar Arquivo</button>
+                    <div id="nameTot" class="mt-2 text-xs font-bold text-success"></div>
+                    <input type="file" id="fileTot" accept=".xlsx,.xls,.csv" hidden>
+                </div>
+            </div>
+
+            <div id="configSection" class="hidden max-w-5xl mx-auto mt-8 fade-in">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
+                        <i class="fa-solid fa-sliders text-primary"></i> Parâmetros de Otimização
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-3">Objetivo Principal</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="obj-card active border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-primary transition flex items-center gap-3" id="objDocs" onclick="selecionarObjetivo('documentos')">
+                                    <div class="text-xl">📄</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-700">Max. Docs</div>
+                                        <div class="text-[10px] text-gray-400">Prioriza boxes cheios</div>
+                                    </div>
+                                </div>
+                                <div class="obj-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-primary transition flex items-center gap-3" id="objBoxes" onclick="selecionarObjetivo('boxes')">
+                                    <div class="text-xl">📦</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-700">Max. Boxes</div>
+                                        <div class="text-[10px] text-gray-400">Agrupa mais caixas</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs font-bold text-gray-400 uppercase">Limite de Códigos Únicos</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="checkCod" class="sr-only peer" checked onchange="toggleInput('Cod')">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <input type="number" id="inputCod" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-primary outline-none" value="30">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs font-bold text-gray-400 uppercase">Limite Setores / Código</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="checkSet" class="sr-only peer" checked onchange="toggleInput('Set')">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <input type="number" id="inputSet" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-primary outline-none" value="12">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-100 flex justify-end">
+                        <button class="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-lg font-bold shadow-lg transition flex items-center gap-2" onclick="iniciarOtimizacao()">
+                            <i class="fa-solid fa-rocket"></i> Iniciar Otimização
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultsSection" class="hidden max-w-7xl mx-auto mt-8 fade-in pb-10">
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="statsGrid">
+                    </div>
+
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Blocos Gerados</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="blocksWrapper">
+                    </div>
+
+                <div id="crossCheckLog" class="hidden mt-8 bg-red-50 border border-red-200 rounded-xl p-6">
+                    <h4 class="text-red-800 font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-ban"></i> Bloqueados pelo Cross-Check</h4>
+                    <p class="text-xs text-red-600 mb-4">Estes boxes foram removidos pois o total eliminável diverge do total físico.</p>
+                    <ul id="errorList" class="text-xs text-red-700 list-disc pl-5 space-y-1 font-mono"></ul>
+                </div>
+
+                <div id="complexLog" class="hidden mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6">
+                    <h4 class="text-amber-800 font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> Boxes Muito Complexos</h4>
+                    <p class="text-xs text-amber-600 mb-4">Excedem os limites de setores/códigos mesmo isolados.</p>
+                    <ul id="complexList" class="text-xs text-amber-700 list-disc pl-5 space-y-1 font-mono"></ul>
+                </div>
+            </div>
+
+            <div id="loader" class="hidden fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+                <h3 class="mt-6 text-lg font-bold text-gray-700">Otimizando Lotes...</h3>
+                <p class="text-sm text-gray-500 mt-2">Processando multi-abas e validações</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- ESTADO ---
+        let state = {
+            fileElim: null, fileTot: null,
+            objective: 'documentos',
+            restrictions: {
+                Cod: { active: true, value: 30 },
+                Set: { active: true, value: 12 }
+            },
+            finalBlocks: []
+        };
+
+        // --- UPLOAD HANDLERS ---
+        setupUpload('fileElim', 'dropElim', 'iconBoxElim', 'nameElim', 'fileElim');
+        setupUpload('fileTot', 'dropTot', 'iconBoxTot', 'nameTot', 'fileTot');
+
+        function setupUpload(inputId, dropId, iconBoxId, nameId, stateKey) {
+            const input = document.getElementById(inputId);
+            const drop = document.getElementById(dropId);
+            const iconBox = document.getElementById(iconBoxId);
+            
+            input.addEventListener('change', (e) => processFile(e.target.files[0], drop, iconBox, nameId, stateKey));
+            drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('drop-active'); });
+            drop.addEventListener('dragleave', () => { drop.classList.remove('drop-active'); });
+            drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('drop-active'); processFile(e.dataTransfer.files[0], drop, iconBox, nameId, stateKey); });
+        }
+
+        // --- LEITURA MULTI-ABAS ---
+        function processFile(file, dropEl, iconBoxEl, nameEl, stateKey) {
+            if(!file) return;
+            
+            // Visual Feedback Loading
+            nameEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Lendo...';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                // Concatenação de Abas
+                let allRows = [];
+                workbook.SheetNames.forEach(sheetName => {
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                    allRows = allRows.concat(rows);
+                });
+
+                state[stateKey] = allRows;
+                
+                // Visual Feedback Success
+                dropEl.classList.add('upload-success');
+                iconBoxEl.className = 'w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 transition shadow-sm';
+                iconBoxEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+                document.getElementById(nameEl.id).innerText = `${file.name} (${workbook.SheetNames.length} abas)`;
+                document.getElementById(nameEl.id).className = 'mt-2 text-xs font-bold text-green-600';
+                
+                // Mostra config se ambos carregados
+                if(state.fileElim && state.fileTot) {
+                    document.getElementById('configSection').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('configSection').scrollIntoView({behavior:'smooth'}), 200);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- UI UTILS ---
+        function selecionarObjetivo(obj) {
+            state.objective = obj;
+            document.querySelectorAll('.obj-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(obj === 'documentos' ? 'objDocs' : 'objBoxes').classList.add('active');
+        }
+
+        function toggleInput(key) {
+            const checkbox = document.getElementById('check'+key);
+            const input = document.getElementById('input'+key);
+            state.restrictions[key].active = checkbox.checked;
+            input.disabled = !checkbox.checked;
+            input.classList.toggle('opacity-50', !checkbox.checked);
+        }
+
+        // --- LÓGICA PRINCIPAL ---
+        function iniciarOtimizacao() {
+            state.restrictions.Cod.value = parseInt(document.getElementById('inputCod').value) || 30;
+            state.restrictions.Set.value = parseInt(document.getElementById('inputSet').value) || 12;
+
+            document.getElementById('loader').classList.remove('hidden');
+            
+            setTimeout(() => {
+                try {
+                    // 1. Extração
+                    const eliminaveisData = extrairDadosCompletos(state.fileElim);
+                    const totaisData = extrairTotais(state.fileTot);
+
+                    // 2. Cross-Check
+                    const validBoxes = [];
+                    const rejectedBoxes = [];
+                    
+                    for(const [boxId, data] of Object.entries(eliminaveisData)) {
+                        const totalReal = totaisData[boxId];
+                        
+                        if(totalReal === undefined) {
+                            rejectedBoxes.push({ id: boxId, motivo: 'Box não encontrado na planilha de Totais' });
+                        } else if(data.qtd === totalReal) {
+                            validBoxes.push(data);
+                        } else {
+                            rejectedBoxes.push({ id: boxId, motivo: `Divergência: ${data.qtd} elim. vs ${totalReal} físico` });
+                        }
+                    }
+
+                    // 3. Algoritmo
+                    const { blocos, complexBoxes } = executarOtimizacao(validBoxes);
+                    state.finalBlocks = blocos;
+
+                    // 4. Renderização
+                    renderizarResultados(Object.keys(eliminaveisData).length, validBoxes, rejectedBoxes, blocos, complexBoxes);
+                    
+                    document.getElementById('uploadSection').classList.add('hidden');
+                    document.getElementById('configSection').classList.add('hidden');
+                    document.getElementById('resultsSection').classList.remove('hidden');
+
+                } catch(e) {
+                    console.error(e);
+                    alert("Erro no processamento: " + e.message);
+                } finally {
+                    document.getElementById('loader').classList.add('hidden');
+                }
+            }, 500);
+        }
+
+        // --- EXTRAÇÃO DE DADOS ---
+        function extrairDadosCompletos(rows) {
+            const map = {};
+            // Índices baseados no padrão informado: Box=K(10), Setor=D(3), Cod=Q(16)
+            for(let i=0; i < rows.length; i++) {
+                const row = rows[i];
+                if(row && row[10] !== undefined) {
+                    const box = String(row[10]).trim();
+                    if(box.toUpperCase() === 'BOX' || box === '') continue;
+
+                    const setor = row[3] ? String(row[3]).trim() : 'ND';
+                    const cod = row[16] ? String(row[16]).trim() : 'ND';
+
+                    if(box) {
+                        if(!map[box]) {
+                            map[box] = { 
+                                id: box, qtd: 0, documentos: [],
+                                codigos: new Set(), setoresPorCod: {}
+                            };
+                        }
+                        map[box].qtd++;
+                        map[box].documentos.push({ SETOR: setor, COD: cod });
+                        
+                        map[box].codigos.add(cod);
+                        if(!map[box].setoresPorCod[cod]) map[box].setoresPorCod[cod] = new Set();
+                        map[box].setoresPorCod[cod].add(setor);
+                    }
+                }
+            }
+            return map;
+        }
+
+        function extrairTotais(rows) {
+            const map = {};
+            // Box=A(0), Total=I(8)
+            for(let i=0; i < rows.length; i++) {
+                const row = rows[i];
+                if(row && row[0] !== undefined) {
+                     const box = String(row[0]).trim();
+                     if(box.toUpperCase() === 'BOX' || box === '') continue;
+
+                    const total = row[8];
+                    if(total !== undefined) {
+                        const key = box.replace(/\.0$/, ''); // Trata formatação numérica do Excel
+                        map[key] = parseInt(total);
+                    }
+                }
+            }
+            return map;
+        }
+
+        // --- ALGORITMO DE OTIMIZAÇÃO ---
+        function executarOtimizacao(boxes) {
+            // Ordenação baseada no objetivo
+            if(state.objective === 'documentos') {
+                boxes.sort((a, b) => b.qtd - a.qtd); // Descrescente (enche blocos rápido)
+            } else {
+                boxes.sort((a, b) => a.qtd - b.qtd); // Crescente (agrupa mais caixas pequenas)
+            }
+
+            const blocos = [];
+            const complexBoxes = [];
+
+            for (const box of boxes) {
+                // Checagem de isolamento (complexidade individual)
+                let boxComplexo = false;
+                if (state.restrictions.Cod.active && box.codigos.size > state.restrictions.Cod.value) boxComplexo = true;
+                if (!boxComplexo && state.restrictions.Set.active) {
+                    for(const cod of box.codigos) {
+                        if(box.setoresPorCod[cod].size > state.restrictions.Set.value) {
+                            boxComplexo = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if(boxComplexo) {
+                    complexBoxes.push(box);
+                    continue;
+                }
+
+                // Tentativa de Encaixe (First Fit)
+                let blocoCandidato = null;
+                for (const bloco of blocos) {
+                    let valido = true;
+
+                    // Restrição Código
+                    if (state.restrictions.Cod.active) {
+                        const uniaoCodigos = new Set([...bloco.codigos, ...box.codigos]);
+                        if (uniaoCodigos.size > state.restrictions.Cod.value) valido = false;
+                    }
+
+                    // Restrição Setor
+                    if (valido && state.restrictions.Set.active) {
+                        for (const cod of box.codigos) {
+                            const setoresAtuais = bloco.setoresPorCod[cod] || new Set();
+                            const setoresNovos = box.setoresPorCod[cod];
+                            const uniaoSetores = new Set([...setoresAtuais, ...setoresNovos]);
+                            if (uniaoSetores.size > state.restrictions.Set.value) {
+                                valido = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (valido) {
+                        blocoCandidato = bloco;
+                        break;
+                    }
+                }
+
+                if (blocoCandidato) {
+                    adicionarBoxAoBloco(blocoCandidato, box);
+                } else {
+                    const novo = criarBloco(blocos.length + 1);
+                    adicionarBoxAoBloco(novo, box);
+                    blocos.push(novo);
+                }
+            }
+
+            return { blocos, complexBoxes };
+        }
+
+        function criarBloco(id) {
+            return { id: id, boxes: [], totalDocs: 0, codigos: new Set(), setoresPorCod: {} };
+        }
+
+        function adicionarBoxAoBloco(bloco, box) {
+            bloco.boxes.push(box);
+            bloco.totalDocs += box.qtd;
+            
+            box.codigos.forEach(c => bloco.codigos.add(c));
+            for(const [cod, setSetores] of Object.entries(box.setoresPorCod)) {
+                if(!bloco.setoresPorCod[cod]) bloco.setoresPorCod[cod] = new Set();
+                setSetores.forEach(s => bloco.setoresPorCod[cod].add(s));
+            }
+        }
+
+        // --- RENDERIZADOR ---
+        function renderizarResultados(totalInput, validos, rejeitados, blocos, complexos) {
+            const totalDocs = validos.reduce((a,b) => a + b.qtd, 0);
+            
+            // KPIs
+            const kpiHTML = (label, val, icon, color) => `
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">${label}</p>
+                        <h3 class="text-2xl font-bold ${color}">${val}</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 text-lg">
+                        <i class="fa-solid ${icon}"></i>
+                    </div>
+                </div>`;
+
+            document.getElementById('statsGrid').innerHTML = 
+                kpiHTML('Boxes Analisados', totalInput, 'fa-box-open', 'text-gray-800') +
+                kpiHTML('Boxes Seguros', validos.length, 'fa-shield-halved', 'text-green-600') +
+                kpiHTML('Docs Elimináveis', totalDocs, 'fa-file-invoice', 'text-primary') +
+                kpiHTML('Blocos Criados', blocos.length, 'fa-layer-group', 'text-blue-600');
+
+            // Blocos
+            const wrapper = document.getElementById('blocksWrapper');
+            wrapper.innerHTML = '';
+            blocos.forEach(b => {
+                const listaBoxes = b.boxes.map(i => i.id).join(', ');
+                wrapper.innerHTML += `
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition hover:-translate-y-1 hover:border-primary group">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <span class="font-bold text-gray-700 text-sm">Bloco #${b.id}</span>
+                            <span class="bg-white border border-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold uppercase">${b.boxes.length} Boxes</span>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between text-xs text-gray-500 mb-2 border-b border-gray-50 pb-2">
+                                <span>Documentos: <strong class="text-gray-800">${b.totalDocs}</strong></span>
+                                <span>Cód. Únicos: <strong class="text-gray-800">${b.codigos.size}</strong></span>
+                            </div>
+                            <div class="bg-orange-50 text-orange-900 text-[10px] p-2 rounded border border-orange-100 font-mono h-20 overflow-y-auto leading-relaxed">
+                                ${listaBoxes}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Logs
+            if(rejeitados.length > 0) {
+                document.getElementById('crossCheckLog').classList.remove('hidden');
+                document.getElementById('errorList').innerHTML = rejeitados.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
+            }
+
+            if(complexos.length > 0) {
+                document.getElementById('complexLog').classList.remove('hidden');
+                document.getElementById('complexList').innerHTML = complexos.map(b => `<li><strong>Box ${b.id}:</strong> Sozinho já excede limites (${b.codigos.size} Códigos)</li>`).join('');
+            }
+        }
+
+        function exportarExcel() {
+            if(!state.finalBlocks.length) return alert("Gere os blocos antes de exportar!");
+            
+            const data = [];
+            state.finalBlocks.forEach(b => {
+                b.boxes.forEach(box => {
+                    box.documentos.forEach(doc => {
+                        data.push({
+                            'Bloco': b.id,
+                            'Box': box.id,
+                            'Setor': doc.SETOR,
+                            'Código': doc.COD
+                        });
+                    });
+                });
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Blocos Otimizados");
+            XLSX.writeFile(wb, "Resultado_Eliminacao_Otimizado.xlsx");
+        }
+    </script>
+</body>
+</html>
