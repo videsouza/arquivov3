@@ -16,6 +16,7 @@
                 extend: {
                     colors: {
                         primary: '#f7931e',
+                        'primary-hover': '#d67d12',
                         dark: '#1f2937',
                         light: '#f3f4f6'
                     },
@@ -37,37 +38,21 @@
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .box-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            gap: 6px;
-        }
+        /* Grid */
+        .shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 6px; }
         
         .box-item {
-            aspect-ratio: 1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: white; cursor: pointer; position: relative;
+            transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .box-item:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         
         .tooltip {
             position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
-            background: #1f2937; color: #fff; padding: 8px 12px; border-radius: 6px;
-            font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none;
+            background: #1f2937; color: #fff; padding: 6px 8px; border-radius: 4px;
+            font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none;
             transition: opacity 0.2s; z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center;
-        }
-        .tooltip::after {
-            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px;
-            border-width: 5px; border-style: solid; border-color: #1f2937 transparent transparent transparent;
         }
         .box-item:hover .tooltip { opacity: 1; }
     </style>
@@ -80,17 +65,18 @@
                 <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
                 <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Gestão de Espaço</p>
             </div>
+            
             <nav class="mt-8 px-4 space-y-3">
                 <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-gray-600 hover:bg-gray-700 text-gray-300 hover:text-white transition flex items-center gap-3 mb-6">
                     <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
                 </a>
                 <button onclick="document.getElementById('file-input').click()" class="w-full text-left px-4 py-3 rounded bg-primary hover:bg-primary-hover text-white shadow-lg transition flex items-center gap-3">
-                    <i class="fa-solid fa-upload w-5"></i> <span class="font-medium text-sm">Carregar Mapa</span>
+                    <i class="fa-solid fa-upload w-5"></i> <span class="font-medium text-sm">Carregar Planilha</span>
                 </button>
             </nav>
         </div>
         <div class="p-6 border-t border-gray-700 bg-gray-900/50">
-            <p class="text-[10px] text-gray-500 text-center">Visualizador (Sequencial)<br>&copy; 2025</p>
+            <p class="text-[10px] text-gray-500 text-center">Versão Híbrida v4.0<br>&copy; 2025</p>
         </div>
     </aside>
 
@@ -100,52 +86,54 @@
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
                     <i class="fa-solid fa-cubes text-primary text-xl"></i> Mapa de Ocupação
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Visualização sequencial por número de box.</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Suporta: Mapeamento Físico (Estantes) ou Relatório de Status (Lista).</p>
             </div>
-            <div id="file-info" class="hidden px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded border border-green-200 flex items-center gap-2">
-                <i class="fa-solid fa-check-circle"></i> <span id="filename">arquivo.xlsx</span>
+            <div class="flex gap-2">
+                 <span id="file-name-display" class="hidden px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200 flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-green-600"></i> <span class="font-bold">arquivo.xlsx</span>
+                 </span>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth relative">
             
             <div id="upload-screen" class="max-w-2xl mx-auto mt-10 text-center fade-in">
-                <div onclick="document.getElementById('file-input').click()" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-12 cursor-pointer hover:border-primary hover:bg-orange-50/30 group shadow-sm transition">
-                    <i class="fa-solid fa-file-csv text-6xl text-primary mb-4 group-hover:scale-110 transition"></i>
-                    <h3 class="text-xl font-bold text-gray-700 mb-2">Carregar Relatório de Boxes</h3>
-                    <p class="text-sm text-gray-400">Suporta o formato "Lista de Boxes e Total de Documentos"</p>
+                <div id="drop-zone" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-12 cursor-pointer hover:border-primary hover:bg-orange-50/30 group shadow-sm transition" onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-4 group-hover:text-primary transition"></i>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Carregar Arquivo</h3>
+                    <p class="text-sm text-gray-400">Aceita .xlsx ou .csv</p>
                 </div>
                 <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="processFile(this)">
-                <div id="error-msg" class="hidden mt-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 text-left rounded shadow-sm text-sm"></div>
+                <div id="error-msg" class="hidden mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded text-sm text-left"></div>
             </div>
 
             <div id="dashboard-area" class="hidden fade-in space-y-6">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-center justify-between">
-                    <div class="flex gap-6">
-                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-emerald-500"></div><span class="text-xs font-bold text-gray-600">Vazio (0)</span></div>
-                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-amber-500"></div><span class="text-xs font-bold text-gray-600">Ocupado (1-10)</span></div>
-                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-red-500"></div><span class="text-xs font-bold text-gray-600">Cheio (11+)</span></div>
-                    </div>
-                    <div class="text-xs text-gray-400 italic">Modo de Visualização Sequencial (Agrupado por 100)</div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-center">
+                    <span class="text-xs font-bold uppercase text-gray-400 mr-2">Status:</span>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-emerald-500"></div><span class="text-xs font-bold text-gray-600">Vazio/Pouco</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-amber-500"></div><span class="text-xs font-bold text-gray-600">Médio</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-red-500"></div><span class="text-xs font-bold text-gray-600">Cheio</span></div>
                 </div>
-
                 <div id="shelves-container" class="grid grid-cols-1 xl:grid-cols-2 gap-6"></div>
             </div>
             
             <div id="loader" class="hidden fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                <p class="mt-4 text-sm font-bold text-gray-500 animate-pulse">Lendo relatório...</p>
+                <p class="mt-4 text-sm font-bold text-gray-500 animate-pulse">Processando...</p>
             </div>
         </div>
     </main>
 
     <script>
+        // --- PROCESSAMENTO PRINCIPAL ---
         function processFile(input) {
             if (input.files.length === 0) return;
             const file = input.files[0];
             
             document.getElementById('loader').classList.remove('hidden');
             document.getElementById('error-msg').classList.add('hidden');
+            document.getElementById('file-name-display').innerHTML = `<i class="fa-solid fa-file-excel text-green-600"></i> ${file.name}`;
+            document.getElementById('file-name-display').classList.remove('hidden');
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -154,102 +142,135 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
-                    // 1. Detectar cabeçalho procurando "Total" ou "AGUARDANDO"
+                    // Leitura Bruta para detecção
                     const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                     
-                    let headerRow = -1;
+                    // 1. Tenta achar cabeçalho de LOCALIZAÇÃO (Original)
+                    let locHeaderRow = -1;
                     for (let i = 0; i < Math.min(rawData.length, 20); i++) {
-                        const rowStr = JSON.stringify(rawData[i]).toUpperCase();
-                        if (rowStr.includes("TOTAL") || rowStr.includes("AGUARDANDO")) {
-                            headerRow = i;
+                        const rowStr = JSON.stringify(rawData[i]).toLowerCase();
+                        if (rowStr.includes("corredor") && rowStr.includes("estante")) {
+                            locHeaderRow = i;
                             break;
                         }
                     }
 
-                    if (headerRow === -1) {
-                        // Tenta ler normal se não achou cabeçalho específico
-                        headerRow = 0;
+                    // 2. Tenta achar cabeçalho de RELATÓRIO (Seu arquivo novo)
+                    let reportHeaderRow = -1;
+                    for (let i = 0; i < Math.min(rawData.length, 20); i++) {
+                        const rowStr = JSON.stringify(rawData[i]).toUpperCase();
+                        if (rowStr.includes("TOTAL") || rowStr.includes("AGUARDANDO")) {
+                            reportHeaderRow = i;
+                            break;
+                        }
                     }
 
-                    // Lê os dados a partir do cabeçalho encontrado
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { range: headerRow, defval: 0 });
-                    
-                    renderSequentialMap(jsonData, file.name);
+                    // DECISÃO DE LÓGICA
+                    if (locHeaderRow !== -1) {
+                        // LÓGICA ORIGINAL (Mapeamento Físico)
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { range: locHeaderRow });
+                        renderPhysicalMap(jsonData);
+                    } else if (reportHeaderRow !== -1) {
+                        // LÓGICA RELATÓRIO (Visualiza.xls)
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { range: reportHeaderRow, defval: 0 });
+                        renderReportMap(jsonData);
+                    } else {
+                        throw new Error("Formato desconhecido. O arquivo precisa ter colunas 'Corredor/Estante' OU 'Lista de Boxes/Total'.");
+                    }
 
                 } catch (err) {
-                    const errDiv = document.getElementById('error-msg');
-                    errDiv.innerHTML = `<strong>Erro:</strong> ${err.message}`;
-                    errDiv.classList.remove('hidden');
-                    document.getElementById('loader').classList.add('hidden');
+                    showError(err.message);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function renderSequentialMap(data, filename) {
-            const groups = {};
-            let totalBoxes = 0;
-
-            // Processa o arquivo específico "Visualiza.xls"
-            // Coluna 0 (sem nome ou __EMPTY) = Número do Box
-            // Coluna "Total" = Quantidade
-
+        // --- LÓGICA 1: MAPEAMENTO FÍSICO (ORIGINAL) ---
+        function renderPhysicalMap(data) {
+            const mapData = {};
             data.forEach(row => {
-                // Tenta achar a chave do número do box (geralmente é a primeira chave se não tiver nome)
                 const keys = Object.keys(row);
-                // Assume que a primeira coluna numérica é o ID do Box
-                let boxKey = keys.find(k => k === '__EMPTY' || k === '') || keys[0];
-                let totalKey = keys.find(k => k.toUpperCase() === 'TOTAL') || keys[keys.length - 1];
-
-                let boxId = parseInt(row[boxKey]);
-                let qtd = parseInt(row[totalKey]);
-
-                if (isNaN(boxId)) return; // Pula linhas de rodapé/lixo
-
-                // Cria grupos virtuais de 100 em 100
-                const groupIndex = Math.floor((boxId - 1) / 100) + 1;
-                const groupName = `Lote ${((groupIndex-1)*100)+1} a ${groupIndex*100}`;
-
-                if (!groups[groupIndex]) groups[groupIndex] = { name: groupName, boxes: [] };
+                const corr = row[keys.find(k=>k.match(/corredor/i))];
+                const est = row[keys.find(k=>k.match(/estante/i))];
+                const prat = row[keys.find(k=>k.match(/prateleira/i))];
+                const cx = row[keys.find(k=>k.match(/caixa|box/i))];
                 
-                groups[groupIndex].boxes.push({ id: boxId, count: qtd || 0 });
-                totalBoxes++;
+                if(!corr || !est || !prat || !cx) return;
+
+                const path = `${corr}-${est}`;
+                if(!mapData[path]) mapData[path] = { c: corr, e: est, p: {} };
+                if(!mapData[path].p[prat]) mapData[path].p[prat] = [];
+                mapData[path].p[prat].push({ id: cx, qtd: 1 }); // Assume 1 doc se não tiver qtd
+            });
+            
+            buildGrid(mapData, 'physical');
+        }
+
+        // --- LÓGICA 2: RELATÓRIO (SEU ARQUIVO NOVO) ---
+        function renderReportMap(data) {
+            const mapData = {};
+            
+            data.forEach(row => {
+                const keys = Object.keys(row);
+                // No seu arquivo, a primeira coluna é Box e a última é Total
+                const boxId = row[keys[0]]; 
+                const total = row['Total'] || row[keys[keys.length-1]];
+
+                if(!boxId || isNaN(parseInt(boxId))) return;
+
+                // Cria estantes virtuais de 100 em 100 para organizar visualmente
+                const groupIdx = Math.floor((boxId-1)/100) + 1;
+                const path = `G-${groupIdx}`;
+                
+                if(!mapData[path]) mapData[path] = { c: 'Virtual', e: `${((groupIdx-1)*100)+1} a ${groupIdx*100}`, p: { 'Lista': [] } };
+                mapData[path].p['Lista'].push({ id: boxId, qtd: parseInt(total) });
             });
 
-            if (totalBoxes === 0) throw new Error("Nenhum box numérico encontrado.");
+            buildGrid(mapData, 'report');
+        }
 
-            // Renderiza
+        // --- RENDERIZADOR UNIFICADO ---
+        function buildGrid(mapData, mode) {
             const container = document.getElementById('shelves-container');
             container.innerHTML = '';
 
-            Object.keys(groups).sort((a,b) => a - b).forEach(idx => {
-                const group = groups[idx];
+            Object.keys(mapData).sort().forEach(key => {
+                const shelf = mapData[key];
                 
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition';
                 
+                let title = mode === 'physical' 
+                    ? `Corredor ${shelf.c} - Estante ${shelf.e}`
+                    : `Lote de Boxes: ${shelf.e}`;
+
                 let html = `
-                    <h3 class="text-sm font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2 flex justify-between">
-                        <span><i class="fa-solid fa-layer-group text-primary mr-2"></i> ${group.name}</span>
-                        <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">${group.boxes.length} caixas</span>
+                    <h3 class="text-sm font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">
+                        <i class="fa-solid fa-layer-group text-primary mr-2"></i> ${title}
                     </h3>
-                    <div class="box-grid">
+                    <div class="space-y-4">
                 `;
 
-                group.boxes.forEach(box => {
-                    let bgClass = 'bg-emerald-500';
-                    if(box.count > 0) bgClass = 'bg-amber-500';
-                    if(box.count > 10) bgClass = 'bg-red-500';
+                Object.keys(shelf.p).sort().forEach(pratKey => {
+                    const boxes = shelf.p[pratKey];
+                    // Se for fisico mostra prateleira, se for relatorio esconde
+                    const label = mode === 'physical' ? `<div class="text-[10px] font-bold text-gray-400 mb-1">PRATELEIRA ${pratKey}</div>` : '';
+                    
+                    html += `<div class="bg-gray-50 p-2 rounded-lg border border-gray-100">${label}<div class="shelf-grid">`;
+                    
+                    boxes.forEach(box => {
+                        let color = 'bg-emerald-500';
+                        if(box.qtd > 0) color = 'bg-amber-500';
+                        if(box.qtd > 10) color = 'bg-red-500';
 
-                    html += `
-                        <div class="box-item ${bgClass}">
-                            ${box.id}
-                            <div class="tooltip">
-                                <strong>Box ${box.id}</strong><br>
-                                ${box.count} docs
+                        html += `
+                            <div class="box-item ${color}">
+                                ${box.id}
+                                <div class="tooltip">Box ${box.id}<br>${box.qtd} docs</div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    });
+                    html += `</div></div>`;
                 });
 
                 html += `</div>`;
@@ -257,12 +278,20 @@
                 container.appendChild(card);
             });
 
-            // Finaliza UI
-            document.getElementById('filename').innerText = filename;
-            document.getElementById('file-info').classList.remove('hidden');
+            finishLoading();
+        }
+
+        function finishLoading() {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('upload-screen').classList.add('hidden');
             document.getElementById('dashboard-area').classList.remove('hidden');
+        }
+
+        function showError(msg) {
+            document.getElementById('loader').classList.add('hidden');
+            const el = document.getElementById('error-msg');
+            el.innerHTML = `<strong>Ops!</strong> ${msg}`;
+            el.classList.remove('hidden');
         }
     </script>
 </body>
