@@ -27,10 +27,10 @@
             }
         }
         
-        // --- NOVAS CORES (ALTO CONTRASTE) ---
+        // --- CORES DE ALTO CONTRASTE (DISTINTAS) ---
         const STATUS_COLORS = {
             'AGUARDANDO PLANILHA': '#1e40af',       // Azul Escuro (Royal)
-            'AGUARDANDO PUB. BM': '#fbbf24',        // Amarelo Ouro (Contraste total com Azul)
+            'AGUARDANDO PUB. BM': '#facc15',        // Amarelo Ouro (Muito diferente do azul)
             'CUMPRINDO PRAZOS': '#16a34a',          // Verde
             'DEVOLVIDO AO PORTADOR': '#f97316',     // Laranja
             'EMPRESTADO': '#9333ea',                // Roxo Vibrante
@@ -81,7 +81,7 @@
             font-size: 10px;
             font-weight: 900;
             color: rgba(255,255,255,1);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9); /* Sombra forte para ler em cima do amarelo */
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
             pointer-events: none;
         }
 
@@ -268,7 +268,6 @@
                     let headerRow = -1;
                     for(let i=0; i < Math.min(rawData.length, 25); i++) {
                         const rowStr = JSON.stringify(rawData[i]).toUpperCase();
-                        // Procura uma combinação que indique a linha correta
                         if(rowStr.includes("AGUARDANDO PLANILHA") || rowStr.includes("GUARDA PERMANENTE")) {
                             headerRow = i;
                             break;
@@ -277,35 +276,45 @@
 
                     if(headerRow === -1) throw new Error("Não foi possível localizar a linha de cabeçalho dos status.");
 
-                    // 2. Ler dados
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, { range: headerRow });
+                    // 2. Ler dados (incluindo headers para gerar chaves)
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { range: headerRow, defval: 0 });
                     
                     const boxes = [];
                     globalStats = {};
                     totalGlobalDocs = 0;
                     Object.keys(STATUS_COLORS).forEach(k => globalStats[k] = 0);
 
-                    rows.forEach(row => {
+                    rows.forEach((row, index) => {
                         const keys = Object.keys(row);
+                        
+                        // Identifica colunas de status válidas
                         const statusKeys = keys.filter(k => Object.keys(STATUS_COLORS).some(sc => k.trim().toUpperCase() === sc));
                         
-                        // O ID é a coluna que não é status e não é Total
-                        const idKey = keys.find(k => !statusKeys.includes(k) && k.toUpperCase() !== 'TOTAL' && k !== '__EMPTY');
+                        // IDENTIFICAÇÃO DO BOX (CORREÇÃO CRÍTICA):
+                        // Pega a primeira coluna que NÃO é status e NÃO é 'Total'
+                        // Permite '__EMPTY' porque no seu CSV a coluna do ID está vazia no cabeçalho
+                        let idKey = keys.find(k => !statusKeys.includes(k) && k.toUpperCase() !== 'TOTAL');
                         
-                        if(!idKey) return; // Linha sem ID
+                        // Se não achar chave específica, tenta a chave '__EMPTY' (padrão do sheetjs p/ coluna sem nome)
+                        if (!idKey && row['__EMPTY'] !== undefined) idKey = '__EMPTY';
+                        
+                        // Se ainda assim falhar, tenta a primeira chave disponível que parece ser um ID
+                        if (!idKey) idKey = keys[0];
 
                         const boxIdRaw = row[idKey];
                         const boxIdStr = String(boxIdRaw).toUpperCase();
 
                         // --- FILTRO DE LIXO / RODAPÉ ---
-                        // Ignora se for string vazia, ou conter "SGA", "SISTEMA", "PAGE", "TOTAL"
-                        if(!boxIdRaw || boxIdStr.includes("SGA") || boxIdStr.includes("SISTEMA") || boxIdStr.includes("PAGE") || boxIdStr.includes("TOTAL")) {
+                        if(!boxIdRaw || 
+                           boxIdStr.includes("SGA") || 
+                           boxIdStr.includes("SISTEMA") || 
+                           boxIdStr.includes("PAGE") || 
+                           boxIdStr.includes("TOTAL") ||
+                           keys.length < 3) { // Linhas muito curtas
                             return; 
                         }
 
-                        // Garante que é numérico (opcional, mas bom pra ordenar)
-                        // Se seu box tiver letras (ex: A1), removemos esse check.
-                        // Mas como parece ser numérico sequencial:
+                        // Verifica se o ID é numérico (suporta '1', '01', 1)
                         if(isNaN(parseInt(boxIdRaw))) return;
 
                         const boxData = { id: boxIdRaw, total: 0, composition: [] };
@@ -322,8 +331,6 @@
                             }
                         });
 
-                        // Só adiciona se tiver documentos ou se quisermos mostrar boxes vazios
-                        // O pedido implica mostrar todos.
                         totalGlobalDocs += boxData.total;
                         boxes.push(boxData);
                     });
@@ -372,7 +379,6 @@
                             gradientStr = '#f3f4f6'; // Cinza claro (Vazio)
                         } else {
                             let acc = 0;
-                            // Constrói o gradiente linear vertical (pilha)
                             const stops = box.composition.map(item => {
                                 const pct = (item.val / box.total) * 100;
                                 const color = STATUS_COLORS[item.status];
@@ -383,7 +389,6 @@
                             gradientStr = `linear-gradient(to top, ${stops.join(', ')})`;
                         }
 
-                        // Tooltip detalhado
                         let tooltipContent = `<div class="font-bold border-b border-gray-600 pb-1 mb-1">Box ${box.id}</div>`;
                         box.composition.forEach(c => {
                             const pct = ((c.val / box.total) * 100).toFixed(1);
@@ -405,7 +410,6 @@
                             </div>
                         `;
                     } else {
-                        // Slot vazio para manter o grid alinhado
                         gridHtml += `<div class="w-[40px] h-[40px] border border-dashed border-gray-100 rounded"></div>`;
                     }
                 }
