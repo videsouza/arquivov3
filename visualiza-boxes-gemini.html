@@ -14,132 +14,129 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#f7931e',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    }
+                    colors: { primary: '#f7931e', dark: '#1f2937', light: '#f3f4f6' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
                 }
             }
         }
         
-        // --- CORES DE ALTO CONTRASTE ---
+        // --- CORES SÓLIDAS E VIBRANTES ---
         const STATUS_COLORS = {
-            'AGUARDANDO PLANILHA': '#1e40af',       // Azul Escuro
-            'AGUARDANDO PUB. BM': '#facc15',        // Amarelo Ouro
+            'AGUARDANDO PLANILHA': '#2563eb',       // Azul Real
+            'AGUARDANDO PUB. BM': '#fbbf24',        // Amarelo Sol
             'CUMPRINDO PRAZOS': '#16a34a',          // Verde
             'DEVOLVIDO AO PORTADOR': '#f97316',     // Laranja
-            'EMPRESTADO': '#9333ea',                // Roxo Vibrante
+            'EMPRESTADO': '#9333ea',                // Roxo
             'GUARDA PERMANENTE': '#dc2626',         // Vermelho
-            'GUARDA PERMANENTE (AMOSTRAGEM)': '#881337' // Vinho Escuro
+            'GUARDA PERMANENTE (AMOSTRAGEM)': '#881337' // Vinho
         };
     </script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        /* Grid 7x7 */
-        .grid-7x7 {
+        /* Layout do Grid 7x7 */
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            grid-template-rows: repeat(7, 1fr);
-            gap: 4px;
-            /* Centraliza o grid dentro do card se sobrar espaço */
-            margin: 0 auto;
-            width: fit-content;
+            gap: 6px;
+            padding: 8px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
 
-        /* Box Individual */
+        /* O Box (Visual Pie Chart Quadrado) */
         .box-unit {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
+            width: 48px;  /* Levemente maior */
+            height: 48px;
+            border-radius: 6px; /* Cantos suaves */
             position: relative;
             cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            background-color: #e5e7eb;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease-in-out;
+            background-color: #f1f5f9; /* Fundo se vazio */
+            border: 1px solid rgba(0,0,0,0.05); /* Borda sutil */
         }
         
         .box-unit:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
             z-index: 50;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border: 2px solid white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
         }
 
-        /* Número do Box */
+        /* Número do Box (Texto com Contorno para legibilidade) */
         .box-number {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 900;
-            color: rgba(255,255,255,0.95);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000;
             pointer-events: none;
         }
 
-        /* TOOLTIP AJUSTADO (ABAIXO DO BOX) */
+        /* Tooltip Flutuante Abaixo */
         .custom-tooltip {
             visibility: hidden;
-            position: absolute;
-            top: 100%;    /* Posiciona ABAIXO do elemento (resolve corte superior) */
-            left: 0;      /* Alinhado à esquerda (resolve corte lateral esquerdo) */
-            margin-top: 8px; 
-            background-color: #1f2937;
-            color: #fff;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 10px;
-            width: max-content;
-            min-width: 90px;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             opacity: 0;
-            transition: opacity 0.15s;
-            text-align: left;
+            position: absolute;
+            top: 100%; /* Abaixo do box */
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            background-color: #0f172a;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            min-width: 140px;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.1s;
             pointer-events: none;
         }
         
-        /* Setinha apontando para cima */
-        .custom-tooltip::after {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 10px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent #1f2937 transparent;
+        /* Ajuste para boxes muito à esquerda */
+        .box-unit:nth-child(7n+1) .custom-tooltip,
+        .box-unit:nth-child(7n+2) .custom-tooltip {
+            left: 0;
+            transform: translateX(0);
         }
         
-        .box-unit:hover .custom-tooltip {
-            visibility: visible;
-            opacity: 1;
+        /* Ajuste para boxes muito à direita */
+        .box-unit:nth-child(7n) .custom-tooltip,
+        .box-unit:nth-child(7n-1) .custom-tooltip {
+            left: auto;
+            right: 0;
+            transform: translateX(0);
         }
 
-        .fade-in { animation: fadeIn 0.6s ease-out; }
+        .box-unit:hover .custom-tooltip { visibility: visible; opacity: 1; }
+
+        .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="flex h-screen text-gray-800 overflow-hidden">
 
-    <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex h-full shrink-0 shadow-xl z-30">
+    <aside class="w-72 bg-dark text-white flex flex-col justify-between hidden md:flex h-full shrink-0 shadow-2xl z-30">
         <div>
             <div class="p-8 border-b border-gray-700">
                 <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
-                <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Análise de Composição</p>
+                <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Visualizador de Composição</p>
             </div>
             
             <nav class="mt-8 px-4 space-y-3">
                 <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-gray-600 hover:bg-gray-700 text-gray-300 hover:text-white transition flex items-center gap-3 mb-6">
-                    <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
+                    <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar</span>
                 </a>
                 
                 <button onclick="document.getElementById('file-input').click()" class="w-full text-left px-4 py-3 rounded bg-primary hover:bg-primary-hover text-white shadow-lg transition flex items-center gap-3">
@@ -147,87 +144,77 @@
                 </button>
                 
                 <button onclick="imprimirAnalise()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
-                    <i class="fa-solid fa-print w-5"></i> <span class="font-medium text-sm">Imprimir Relatório</span>
+                    <i class="fa-solid fa-print w-5"></i> <span class="font-medium text-sm">Imprimir</span>
                 </button>
             </nav>
         </div>
         
         <div class="p-6 border-t border-gray-700 bg-gray-900/50">
-            <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Status & Cores</p>
-            <div class="space-y-1.5 text-[10px] text-gray-400" id="sidebar-legend"></div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-3">Legenda de Status</p>
+            <div class="space-y-2 text-[10px] text-gray-300" id="sidebar-legend"></div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-light relative">
-        <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center shadow-sm z-10 shrink-0 h-20">
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
+        <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10 shrink-0 h-20">
             <div>
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
-                    <i class="fa-solid fa-chart-pie text-primary text-xl"></i> Composição por Status
+                    <i class="fa-solid fa-chart-pie text-primary text-xl"></i> Composição do Acervo
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Mapa percentual de ocupação dos boxes.</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Visualização por Lotes de 49 Caixas (7x7)</p>
             </div>
-            <div class="flex gap-2">
-                 <span id="file-name-display" class="hidden px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200 flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel text-green-600"></i> <span class="font-bold">arquivo.xlsx</span>
-                 </span>
-            </div>
+            <div id="file-name-display" class="hidden px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200 font-bold"></div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 fade-in scroll-smooth relative">
+        <div class="flex-1 overflow-y-auto p-8 fade-in scroll-smooth bg-gray-50">
             
-            <div id="upload-screen" class="max-w-2xl mx-auto mt-10 text-center fade-in">
-                <div onclick="document.getElementById('file-input').click()" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-12 cursor-pointer hover:border-primary hover:bg-orange-50/30 group shadow-sm transition">
-                    <i class="fa-solid fa-file-csv text-6xl text-gray-300 mb-4 group-hover:text-primary transition"></i>
-                    <h3 class="text-xl font-bold text-gray-700 mb-2">Carregar Planilha de Status</h3>
-                    <p class="text-sm text-gray-400 mb-6">Arquivo com status (Aguardando, Guarda Perm, etc.)</p>
+            <div id="upload-screen" class="max-w-2xl mx-auto mt-20 text-center fade-in">
+                <div onclick="document.getElementById('file-input').click()" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-16 cursor-pointer hover:border-primary hover:bg-orange-50/20 group shadow-sm transition-all">
+                    <i class="fa-solid fa-file-csv text-6xl text-gray-300 mb-6 group-hover:text-primary transition"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Carregar Planilha</h3>
+                    <p class="text-sm text-gray-400 mb-6">Selecione o arquivo com status documental</p>
                     <button class="bg-dark text-white px-8 py-3 rounded-lg font-bold hover:bg-black transition shadow-lg">
-                        Selecionar Arquivo
+                        Buscar Arquivo
                     </button>
                 </div>
                 <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="processFile(this)">
-                <div id="error-msg" class="hidden mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded text-sm text-left"></div>
+                <div id="error-msg" class="hidden mt-6 bg-red-100 border border-red-300 text-red-700 p-4 rounded text-sm text-center font-bold"></div>
             </div>
 
-            <div id="dashboard-area" class="hidden fade-in space-y-8">
+            <div id="dashboard-area" class="hidden fade-in space-y-10 w-full max-w-[1920px] mx-auto">
                 
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <div class="flex flex-wrap gap-x-6 gap-y-2" id="top-legend">
-                        </div>
-                </div>
-
-                <div id="grids-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 w-full"></div>
-
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-8">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-calculator text-primary"></i> Resumo Geral do Acervo
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-600">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3">Status Documental</th>
-                                    <th class="px-6 py-3 text-right">Quantidade Absoluta</th>
-                                    <th class="px-6 py-3 text-right">Representatividade (%)</th>
-                                    <th class="px-6 py-3 text-center">Identificação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="summary-table-body"></tbody>
-                            <tfoot class="bg-gray-100 font-bold text-gray-800">
-                                <tr>
-                                    <td class="px-6 py-3">TOTAL GERAL</td>
-                                    <td class="px-6 py-3 text-right" id="total-abs">0</td>
-                                    <td class="px-6 py-3 text-right">100%</td>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                <div id="grids-container" class="flex flex-wrap gap-6 justify-center w-full">
                     </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 max-w-4xl mx-auto">
+                    <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-4">
+                        <i class="fa-solid fa-calculator text-primary"></i> Estatísticas Gerais
+                    </h3>
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3 text-right">Qtd. Documentos</th>
+                                <th class="px-6 py-3 text-right">% Total</th>
+                                <th class="px-6 py-3 text-center">Cor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-table-body"></tbody>
+                        <tfoot class="bg-gray-100 font-bold text-gray-800">
+                            <tr>
+                                <td class="px-6 py-4">TOTAL GERAL</td>
+                                <td class="px-6 py-4 text-right" id="total-abs">0</td>
+                                <td class="px-6 py-4 text-right">100%</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
             <div id="loader" class="hidden fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                <p class="mt-4 text-sm font-bold text-gray-500 animate-pulse">Calculando proporções...</p>
+                <p class="mt-4 text-sm font-bold text-gray-600 animate-pulse uppercase tracking-widest">Processando...</p>
             </div>
         </div>
     </main>
@@ -238,21 +225,13 @@
 
         function initLegends() {
             const sidebarDiv = document.getElementById('sidebar-legend');
-            const topDiv = document.getElementById('top-legend');
             sidebarDiv.innerHTML = '';
-            topDiv.innerHTML = '';
-
+            
             Object.entries(STATUS_COLORS).forEach(([status, color]) => {
                 sidebarDiv.innerHTML += `
-                    <div class="flex items-center gap-2">
-                        <div class="w-2.5 h-2.5 rounded-sm shrink-0 shadow-sm" style="background-color:${color}"></div>
-                        <span class="truncate" title="${status}">${status}</span>
-                    </div>`;
-                
-                topDiv.innerHTML += `
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-sm shrink-0 shadow-sm" style="background-color:${color}"></div>
-                        <span class="text-xs font-bold text-gray-600">${status}</span>
+                    <div class="flex items-center gap-3 p-1">
+                        <div class="w-3 h-3 rounded shadow-sm shrink-0" style="background-color:${color}"></div>
+                        <span class="truncate leading-tight opacity-80">${status}</span>
                     </div>`;
             });
         }
@@ -264,7 +243,7 @@
             
             document.getElementById('loader').classList.remove('hidden');
             document.getElementById('error-msg').classList.add('hidden');
-            document.getElementById('file-name-display').innerHTML = `<i class="fa-solid fa-file-excel text-green-600"></i> <span class="font-bold">${file.name}</span>`;
+            document.getElementById('file-name-display').innerText = file.name;
             document.getElementById('file-name-display').classList.remove('hidden');
 
             const reader = new FileReader();
@@ -273,10 +252,11 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
                     const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                     
                     let headerRow = -1;
-                    for(let i=0; i < Math.min(rawData.length, 25); i++) {
+                    for(let i=0; i < Math.min(rawData.length, 30); i++) {
                         const rowStr = JSON.stringify(rawData[i]).toUpperCase();
                         if(rowStr.includes("AGUARDANDO PLANILHA") || rowStr.includes("GUARDA PERMANENTE")) {
                             headerRow = i;
@@ -284,7 +264,7 @@
                         }
                     }
 
-                    if(headerRow === -1) throw new Error("Não foi possível localizar a linha de cabeçalho dos status.");
+                    if(headerRow === -1) throw new Error("Cabeçalhos de status não encontrados.");
 
                     const rows = XLSX.utils.sheet_to_json(firstSheet, { range: headerRow, defval: 0 });
                     
@@ -297,14 +277,14 @@
                         const keys = Object.keys(row);
                         const statusKeys = keys.filter(k => Object.keys(STATUS_COLORS).some(sc => k.trim().toUpperCase() === sc));
                         
-                        let idKey = keys.find(k => !statusKeys.includes(k) && k.toUpperCase() !== 'TOTAL');
+                        let idKey = keys.find(k => !statusKeys.includes(k) && k.toUpperCase() !== 'TOTAL' && k !== '__EMPTY');
                         if (!idKey && row['__EMPTY'] !== undefined) idKey = '__EMPTY';
                         if (!idKey) idKey = keys[0];
 
                         const boxIdRaw = row[idKey];
                         const boxIdStr = String(boxIdRaw).toUpperCase();
 
-                        if(!boxIdRaw || boxIdStr.includes("SGA") || boxIdStr.includes("SISTEMA") || boxIdStr.includes("PAGE") || boxIdStr.includes("TOTAL") || keys.length < 3) return; 
+                        if(!boxIdRaw || boxIdStr.includes("SGA") || boxIdStr.includes("SISTEMA") || boxIdStr.includes("PAGE") || boxIdStr.includes("TOTAL") || keys.length < 3) return;
 
                         if(isNaN(parseInt(boxIdRaw))) return;
 
@@ -326,14 +306,14 @@
                         boxes.push(boxData);
                     });
 
-                    if(boxes.length === 0) throw new Error("Nenhum box válido encontrado.");
+                    if(boxes.length === 0) throw new Error("Nenhum box encontrado.");
 
                     renderGrids(boxes);
 
                 } catch (err) {
                     document.getElementById('loader').classList.add('hidden');
                     const el = document.getElementById('error-msg');
-                    el.innerHTML = `<strong>Erro:</strong> ${err.message}`;
+                    el.innerText = err.message;
                     el.classList.remove('hidden');
                 }
             };
@@ -344,22 +324,21 @@
             const container = document.getElementById('grids-container');
             container.innerHTML = '';
             
-            const CHUNK_SIZE = 49; // 7x7
+            const CHUNK_SIZE = 49;
             
             for (let i = 0; i < boxes.length; i += CHUNK_SIZE) {
                 const chunk = boxes.slice(i, i + CHUNK_SIZE);
                 const pageNum = Math.floor(i/CHUNK_SIZE) + 1;
                 
                 const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-200 fade-in flex flex-col items-center';
-                // flex-col items-center garante que se o card for muito largo, o grid 7x7 fica no meio
+                card.className = 'flex flex-col items-center bg-white p-6 rounded-lg shadow-sm border border-gray-200 fade-in';
                 
                 let gridHtml = `
-                    <div class="w-full flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
-                        <span class="text-xs font-bold text-gray-500 uppercase">Grupo ${pageNum}</span>
-                        <span class="text-[10px] text-gray-400">Boxes ${chunk[0].id} a ${chunk[chunk.length-1].id}</span>
+                    <div class="w-full flex justify-between items-end mb-4 border-b border-gray-100 pb-2">
+                        <span class="text-sm font-bold text-gray-700 uppercase tracking-wide">Lote ${pageNum}</span>
+                        <span class="text-[10px] font-mono text-gray-400">Boxes ${chunk[0].id} - ${chunk[chunk.length-1].id}</span>
                     </div>
-                    <div class="grid-7x7">
+                    <div class="grid-container">
                 `;
 
                 for (let j = 0; j < CHUNK_SIZE; j++) {
@@ -368,8 +347,10 @@
                     if (box) {
                         let gradientStr;
                         if (box.total === 0) {
-                            gradientStr = '#f3f4f6';
+                            gradientStr = '#f1f5f9';
                         } else {
+                            // MUDANÇA CRUCIAL: CONIC GRADIENT (Pizza)
+                            // Fica muito mais limpo visualmente que o linear (listrado)
                             let acc = 0;
                             const stops = box.composition.map(item => {
                                 const pct = (item.val / box.total) * 100;
@@ -378,20 +359,20 @@
                                 acc += pct;
                                 return segment;
                             });
-                            gradientStr = `linear-gradient(to top, ${stops.join(', ')})`;
+                            gradientStr = `conic-gradient(from 0deg, ${stops.join(', ')})`;
                         }
 
-                        // TOOLTIP SIMPLIFICADO (Apenas Quadrado + Valor)
-                        let tooltipContent = `<div class="font-bold border-b border-gray-600 pb-1 mb-1">Box ${box.id}</div>`;
+                        // Tooltip minimalista
+                        let tooltipContent = `<div class="font-bold border-b border-gray-700 pb-1 mb-1 text-white">Box ${box.id}</div>`;
                         box.composition.forEach(c => {
                             const pct = ((c.val / box.total) * 100).toFixed(1);
                             tooltipContent += `
                                 <div class="flex items-center justify-between gap-3 text-[10px] mb-1">
-                                    <div class="w-3 h-3 rounded-sm shadow-sm" style="background:${STATUS_COLORS[c.status]}"></div>
-                                    <span>${c.val} (${pct}%)</span>
+                                    <div class="w-3 h-3 rounded-sm" style="background:${STATUS_COLORS[c.status]}"></div>
+                                    <span class="text-gray-300 font-mono">${c.val}</span>
                                 </div>`;
                         });
-                        tooltipContent += `<div class="mt-1 pt-1 border-t border-gray-600 text-right font-bold text-[10px]">Total: ${box.total}</div>`;
+                        tooltipContent += `<div class="mt-1 pt-1 border-t border-gray-700 text-right font-bold text-[9px] text-gray-400">Total: ${box.total}</div>`;
 
                         gridHtml += `
                             <div class="box-unit" style="background: ${gradientStr}">
@@ -400,7 +381,7 @@
                             </div>
                         `;
                     } else {
-                        gridHtml += `<div class="w-[40px] h-[40px] border border-dashed border-gray-100 rounded"></div>`;
+                        gridHtml += `<div class="w-[48px] h-[48px] border border-dashed border-gray-200 rounded-md"></div>`;
                     }
                 }
 
@@ -427,15 +408,15 @@
                 const color = STATUS_COLORS[status];
                 
                 tbody.innerHTML += `
-                    <tr class="bg-white border-b hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                             <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                    <tr class="border-b last:border-0 hover:bg-gray-50 transition">
+                        <td class="px-6 py-3 font-medium text-gray-700 flex items-center gap-3">
+                             <div class="w-4 h-4 rounded shadow-sm shrink-0" style="background-color: ${color}"></div>
                              ${status}
                         </td>
-                        <td class="px-6 py-4 text-right font-mono text-gray-600">${qtd.toLocaleString()}</td>
-                        <td class="px-6 py-4 text-right font-bold text-gray-800">${pct}%</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold text-white shadow-sm" style="background-color: ${color}">COR</span>
+                        <td class="px-6 py-3 text-right font-mono text-gray-600">${qtd.toLocaleString()}</td>
+                        <td class="px-6 py-3 text-right font-bold text-gray-800">${pct}%</td>
+                        <td class="px-6 py-3 text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-sm" style="background-color: ${color}">COR</span>
                         </td>
                     </tr>
                 `;
