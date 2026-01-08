@@ -32,7 +32,10 @@
         }
         .config-input:focus { outline: none; border-color: #f7931e; ring: 2px solid #f7931e; }
         
-        /* Botão Pulsante quando pronto */
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #f7931e; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #f7931e; }
+        
         .pulse-btn { animation: pulse-green 2s infinite; }
         @keyframes pulse-green {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
@@ -55,14 +58,14 @@
                     <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
                 </a>
                 
-                <div class="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest font-bold border-b border-gray-700 mb-2">Ações</div>
+                <div class="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest font-bold border-b border-gray-700 mb-2">Fluxo de Trabalho</div>
                 
                 <button onclick="document.getElementById('file-input').click()" class="w-full text-left px-4 py-3 rounded bg-primary hover:bg-primary-hover text-white shadow-lg transition flex items-center gap-3">
                     <i class="fa-solid fa-folder-open w-5"></i> <span class="font-medium text-sm">1. Carregar Dados</span>
                 </button>
                 
                 <button onclick="exportarExcel()" id="btn-export" class="w-full text-left px-4 py-3 rounded bg-gray-700 text-gray-400 cursor-not-allowed transition flex items-center gap-3" disabled>
-                    <i class="fa-solid fa-file-export w-5"></i> <span class="font-medium text-sm">3. Exportar Resultado</span>
+                    <i class="fa-solid fa-file-export w-5"></i> <span class="font-medium text-sm">3. Exportar Excel</span>
                 </button>
             </nav>
         </div>
@@ -76,61 +79,74 @@
         <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10 shrink-0 h-20">
             <div>
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
-                    <i class="fa-solid fa-network-wired text-primary text-xl"></i> Otimizador de Blocos
+                    <i class="fa-solid fa-network-wired text-primary text-xl"></i> Otimizador de Eliminação
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Algoritmo de agrupamento por restrições.</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Agrupamento inteligente baseado nos parâmetros definidos.</p>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 fade-in scroll-smooth bg-gray-50">
             
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
                     <h3 class="text-sm font-bold text-gray-700 uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-sliders"></i> Parâmetros
+                        <i class="fa-solid fa-sliders"></i> Parâmetros de Otimização
                     </h3>
-                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Ajuste antes de executar</span>
+                    <span class="text-xs text-gray-400">Defina as prioridades antes de executar</span>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Máx. Caixas / Bloco</label>
-                        <input type="number" id="limiteCaixas" value="25" class="config-input">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+                    
+                    <div class="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase text-center">1. Objetivo Principal</label>
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="text-xs font-bold text-gray-500">Docs</span>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="optimizationTarget" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:right-0 checked:border-primary transition-all duration-300"/>
+                                <label for="optimizationTarget" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                            <span class="text-xs font-bold text-primary">Boxes</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 text-center mt-2" id="target-desc">Priorizando Quantidade de Boxes</p>
                     </div>
+
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Máx. Páginas / Bloco</label>
-                        <input type="number" id="limitePaginas" value="5000" class="config-input">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">2. Máx. Códigos Únicos (Assuntos)</label>
+                        <input type="number" id="limiteCodigos" value="30" class="config-input font-mono text-lg">
+                        <p class="text-[9px] text-gray-400 mt-1">Limite de assuntos diferentes por bloco.</p>
                     </div>
+
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Máx. Assuntos</label>
-                        <input type="number" id="limiteTipos" value="5" class="config-input">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">3. Máx. Setores (Origens)</label>
+                        <input type="number" id="limiteSetores" value="12" class="config-input font-mono text-lg">
+                        <p class="text-[9px] text-gray-400 mt-1">Limite de origens diferentes por bloco.</p>
                     </div>
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Máx. Setores</label>
-                        <input type="number" id="limiteSetores" value="5" class="config-input">
-                    </div>
+                    
+                    <input type="hidden" id="limiteFisicoCaixas" value="25">
+                    <input type="hidden" id="limiteFisicoPaginas" value="5000">
+
                 </div>
             </div>
 
             <div id="action-area" class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 text-center mb-8">
                 
                 <div id="upload-stage" class="cursor-pointer group" onclick="document.getElementById('file-input').click()">
-                    <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-primary"></i>
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition duration-300">
+                        <i class="fa-solid fa-file-excel text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-700">Carregar Dados Brutos</h3>
-                    <p class="text-sm text-gray-400">Clique para selecionar o arquivo Excel (.xlsx)</p>
+                    <h3 class="text-lg font-bold text-gray-700">Carregar Planilha Bruta</h3>
+                    <p class="text-sm text-gray-400">Clique para selecionar (.xlsx)</p>
                 </div>
 
                 <div id="ready-stage" class="hidden">
-                    <div class="flex items-center justify-center gap-2 text-green-600 font-bold mb-4 bg-green-50 w-fit mx-auto px-4 py-2 rounded-full border border-green-200">
-                        <i class="fa-solid fa-check-circle"></i>
-                        <span id="file-name-display">Arquivo carregado</span>
+                    <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold mb-6 border border-green-200">
+                        <i class="fa-solid fa-check"></i> <span id="file-name-display">Arquivo pronto</span>
                     </div>
                     
-                    <button onclick="runOptimization()" class="pulse-btn bg-gray-900 text-white text-lg font-bold py-4 px-12 rounded-xl hover:bg-black transition shadow-xl flex items-center gap-3 mx-auto">
-                        <i class="fa-solid fa-play"></i> 2. EXECUTAR OTIMIZAÇÃO
+                    <button onclick="runOptimization()" class="pulse-btn bg-dark text-white text-lg font-bold py-4 px-12 rounded-xl hover:bg-black transition shadow-xl flex items-center gap-3 mx-auto transform hover:scale-105">
+                        <i class="fa-solid fa-gears"></i> EXECUTAR OTIMIZAÇÃO
                     </button>
-                    <p class="text-xs text-gray-400 mt-4">Clique para processar o algoritmo com os parâmetros acima.</p>
+                    <p class="text-xs text-gray-400 mt-4">Aplicará os limites de <strong>30 códigos</strong> e <strong>12 setores</strong>.</p>
                 </div>
 
                 <input type="file" id="file-input" accept=".xlsx, .xls" class="hidden" onchange="handleFile(this)">
@@ -138,31 +154,34 @@
 
             <div id="results-area" class="hidden fade-in space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-primary">
-                        <span class="text-xs text-gray-400 uppercase">Total Blocos Gerados</span>
-                        <div class="text-2xl font-bold text-gray-800" id="kpi-blocos">0</div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-primary">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Total Blocos Criados</span>
+                        <div class="text-3xl font-bold text-gray-800 mt-1" id="kpi-blocos">0</div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
-                        <span class="text-xs text-gray-400 uppercase">Caixas Alocadas</span>
-                        <div class="text-2xl font-bold text-gray-800" id="kpi-alocados">0</div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Caixas Otimizadas</span>
+                        <div class="text-3xl font-bold text-gray-800 mt-1" id="kpi-alocados">0</div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
-                        <span class="text-xs text-gray-400 uppercase">Não Alocadas (Restrição)</span>
-                        <div class="text-2xl font-bold text-gray-800" id="kpi-rejeitados">0</div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Rejeitadas (Violação)</span>
+                        <div class="text-3xl font-bold text-gray-800 mt-1" id="kpi-rejeitados">0</div>
                     </div>
                 </div>
 
                 <div id="blocks-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6"></div>
 
                 <div id="error-log" class="hidden bg-red-50 p-6 rounded-xl border border-red-200">
-                    <h4 class="text-red-800 font-bold mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Relatório de Exclusões</h4>
-                    <ul class="list-disc pl-5 text-sm text-red-700" id="error-list"></ul>
+                    <h4 class="text-red-800 font-bold mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i> Caixas não alocadas
+                    </h4>
+                    <p class="text-xs text-red-600 mb-3">Estas caixas possuem complexidade (códigos/setores) maior que o limite permitido para um único bloco.</p>
+                    <ul class="list-disc pl-5 text-sm text-red-700 max-h-40 overflow-y-auto" id="error-list"></ul>
                 </div>
             </div>
 
             <div id="loader" class="hidden fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest">Calculando Blocos...</p>
+                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest">Processando Algoritmo...</p>
             </div>
 
         </div>
@@ -171,12 +190,19 @@
     <script>
         // --- ESTADO GLOBAL ---
         let state = {
-            rawBoxes: [],     // Dados processados do Excel
-            finalBlocks: [],  // Resultado
-            rejected: []      // Erros
+            rawBoxes: [],     
+            finalBlocks: [],  
+            rejected: []      
         };
 
-        // --- 1. CARREGAMENTO DO ARQUIVO ---
+        // UI Listener do Toggle
+        document.getElementById('optimizationTarget').addEventListener('change', (e) => {
+            const label = document.getElementById('target-desc');
+            label.innerText = e.target.checked ? "Priorizando Quantidade de Boxes" : "Priorizando Volume de Documentos";
+            // Checkbox Checked = Boxes (True), Unchecked = Docs (False)
+        });
+
+        // 1. CARREGAMENTO
         function handleFile(input) {
             if (input.files.length === 0) return;
             
@@ -197,36 +223,35 @@
                     });
 
                     if(allRows.length === 0) throw new Error("Planilha vazia.");
-
                     preProcessData(allRows, file.name);
 
                 } catch (err) {
-                    alert("Erro ao ler arquivo: " + err.message);
+                    alert("Erro: " + err.message);
                     document.getElementById('loader').classList.add('hidden');
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // --- 2. PRÉ-PROCESSAMENTO (SÓ LÊ, NÃO OTIMIZA AINDA) ---
+        // 2. PRÉ-PROCESSAMENTO
         function preProcessData(rows, filename) {
             const boxesMap = new Map();
             const rejected = [];
 
             rows.forEach(row => {
                 const keys = Object.keys(row);
-                // Busca inteligente de colunas
-                const kBox = keys.find(k => k.toUpperCase().includes('BOX') || k.toUpperCase().includes('CAIXA'));
-                const kSetor = keys.find(k => k.toUpperCase().includes('SETOR') || k.toUpperCase().includes('ORIGEM'));
-                const kCod = keys.find(k => k.toUpperCase().includes('COD') || k.toUpperCase().includes('ASSUNTO'));
-                const kPag = keys.find(k => k.toUpperCase().includes('PAG') || k.toUpperCase().includes('FOLHA'));
+                // Detecção flexível de colunas
+                const kBox = keys.find(k => k.match(/box|caixa/i));
+                const kSetor = keys.find(k => k.match(/setor|origem/i));
+                const kCod = keys.find(k => k.match(/cod|assunto|tipo/i));
+                const kPag = keys.find(k => k.match(/pag|folha|doc/i));
 
                 if (!kBox) return; 
 
                 const boxId = row[kBox];
                 const setor = row[kSetor] || "GERAL";
                 const cod = row[kCod] || "OUTROS";
-                const pag = parseInt(row[kPag]) || 0; 
+                const pag = parseInt(row[kPag]) || 1; // Assume 1 se não tiver info
 
                 if (!boxesMap.has(boxId)) {
                     boxesMap.set(boxId, {
@@ -249,53 +274,63 @@
             const validBoxes = [];
             boxesMap.forEach(box => {
                 if (box.totalPaginas <= 0) {
-                    rejected.push({ id: box.id, motivo: "Erro: 0 Páginas ou Leitura Inválida" });
+                    rejected.push({ id: box.id, motivo: "Box sem documentos ou erro de leitura" });
                 } else {
                     validBoxes.push(box);
                 }
             });
 
-            // Salva no estado
             state.rawBoxes = validBoxes;
-            state.rejected = rejected; // Guarda rejeitados iniciais
+            state.rejected = rejected;
 
-            // ATUALIZA UI PARA "PRONTO"
+            // Atualiza UI
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('upload-stage').classList.add('hidden');
             document.getElementById('ready-stage').classList.remove('hidden');
-            document.getElementById('file-name-display').innerText = `${filename} (${validBoxes.length} caixas válidas)`;
-            document.getElementById('status-bar').innerText = "Dados carregados. Pronto para otimizar.";
+            document.getElementById('file-name-display').innerText = `${filename} (${validBoxes.length} caixas)`;
+            document.getElementById('status-bar').innerText = "Arquivo carregado. Configure os parâmetros e execute.";
         }
 
-        // --- 3. EXECUTAR OTIMIZAÇÃO (NOVO GATILHO) ---
+        // 3. EXECUTAR
         function runOptimization() {
             document.getElementById('loader').classList.remove('hidden');
-            
-            // Timeout para permitir que a UI do loader apareça antes do travamento do cálculo
-            setTimeout(() => {
-                optimizeBlocks();
-            }, 100);
+            setTimeout(optimizeBlocks, 100);
         }
 
         function optimizeBlocks() {
-            // Parâmetros
+            // Parâmetros do Usuário
+            const prioritizeBoxes = document.getElementById('optimizationTarget').checked;
+            const limitCodes = parseInt(document.getElementById('limiteCodigos').value) || 30;
+            const limitSectors = parseInt(document.getElementById('limiteSetores').value) || 12;
+            
+            // Limites Físicos (Fixos/Ocultos para segurança)
+            const limitPhyBoxes = parseInt(document.getElementById('limiteFisicoCaixas').value) || 25;
+            const limitPhyPages = parseInt(document.getElementById('limiteFisicoPaginas').value) || 5000;
+
             const LIMITS = {
-                maxBoxes: parseInt(document.getElementById('limiteCaixas').value),
-                maxPages: parseInt(document.getElementById('limitePaginas').value),
-                maxTypes: parseInt(document.getElementById('limiteTipos').value),
-                maxSectors: parseInt(document.getElementById('limiteSetores').value)
+                maxCodes: limitCodes,
+                maxSectors: limitSectors,
+                maxBoxes: limitPhyBoxes,
+                maxPages: limitPhyPages
             };
 
             let boxesToAllocate = [...state.rawBoxes];
             const blocks = [];
-            
-            // Rejeitados durante a otimização
             let optRejected = [...state.rejected]; 
 
-            // ORDENAÇÃO (Regra Original)
+            // --- ESTRATÉGIA DE ORDENAÇÃO (O "PULO DO GATO") ---
             boxesToAllocate.sort((a, b) => {
-                if (a.codigos.size !== b.codigos.size) return a.codigos.size - b.codigos.size;
-                return b.totalPaginas - a.totalPaginas;
+                if (prioritizeBoxes) {
+                    // MODO: OTIMIZAR BOXES (Quantidade)
+                    // Queremos caixas "fáceis" primeiro (poucos códigos) para encher o bloco de caixas
+                    // Se empatar em complexidade, pega as menores em páginas para caber mais
+                    if (a.codigos.size !== b.codigos.size) return a.codigos.size - b.codigos.size;
+                    return a.totalPaginas - b.totalPaginas; 
+                } else {
+                    // MODO: OTIMIZAR DOCUMENTOS (Volume)
+                    // Queremos caixas "pesadas" primeiro para garantir que os blocos fiquem cheios de papel
+                    return b.totalPaginas - a.totalPaginas;
+                }
             });
 
             let currentBlockId = 1;
@@ -309,17 +344,18 @@
 
                 let remainingBoxes = [];
 
+                // Tenta encaixar (Greedy)
                 for (let i = 0; i < boxesToAllocate.length; i++) {
                     const box = boxesToAllocate[i];
 
                     if (checkConstraints(currentBlock, box, LIMITS)) {
-                        // Adiciona
+                        // Aloca
                         currentBlock.boxes.push(box);
                         currentBlock.stats.pages += box.totalPaginas;
                         box.codigos.forEach(c => currentBlock.stats.uniqueCodes.add(c));
                         box.setores.forEach(s => currentBlock.stats.uniqueSectors.add(s));
                     } else {
-                        // Devolve pra pilha
+                        // Não coube, sobra
                         remainingBoxes.push(box);
                     }
                 }
@@ -327,11 +363,16 @@
                 if (currentBlock.boxes.length > 0) {
                     blocks.push(currentBlock);
                 } else {
-                    // Loop Infinito Breaker: Caixas restantes não cabem em nenhum bloco vazio
-                    remainingBoxes.forEach(b => optRejected.push({ id: b.id, motivo: "Complexidade excede limites configurados (Sozinho)" }));
-                    break;
+                    // Se criou um bloco novo e não conseguiu colocar NENHUMA caixa
+                    // Significa que as caixas restantes violam os limites SOZINHAS
+                    remainingBoxes.forEach(b => {
+                        optRejected.push({ 
+                            id: b.id, 
+                            motivo: `Sozinha excede limites: ${b.codigos.size} Cód (Máx ${LIMITS.maxCodes}) ou ${b.setores.size} Setores (Máx ${LIMITS.maxSectors})` 
+                        });
+                    });
+                    break; // Sai do loop para não travar
                 }
-
                 boxesToAllocate = remainingBoxes;
             }
 
@@ -341,13 +382,18 @@
         }
 
         function checkConstraints(block, box, limits) {
+            // 1. Limites Físicos
             if (block.boxes.length + 1 > limits.maxBoxes) return false;
             if (block.stats.pages + box.totalPaginas > limits.maxPages) return false;
 
+            // 2. Limites de Complexidade (Parâmetros do Usuário)
+            
+            // Simula adição de códigos
             let tempCodes = new Set(block.stats.uniqueCodes);
             box.codigos.forEach(c => tempCodes.add(c));
-            if (tempCodes.size > limits.maxTypes) return false;
+            if (tempCodes.size > limits.maxCodes) return false;
 
+            // Simula adição de setores
             let tempSectors = new Set(block.stats.uniqueSectors);
             box.setores.forEach(s => tempSectors.add(s));
             if (tempSectors.size > limits.maxSectors) return false;
@@ -355,27 +401,31 @@
             return true;
         }
 
-        // --- 4. EXIBIÇÃO ---
+        // 4. RESULTADOS
         function renderResults() {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('results-area').classList.remove('hidden');
 
-            // KPIs
             document.getElementById('kpi-blocos').innerText = state.finalBlocks.length;
             document.getElementById('kpi-alocados').innerText = state.finalBlocks.reduce((acc, b) => acc + b.boxes.length, 0);
             document.getElementById('kpi-rejeitados').innerText = state.rejected.length;
 
-            // Botão Exportar
             const btnExport = document.getElementById('btn-export');
             btnExport.disabled = false;
             btnExport.classList.remove('bg-gray-700', 'cursor-not-allowed', 'text-gray-400');
-            btnExport.classList.add('bg-primary', 'hover:bg-primary-hover', 'text-white', 'shadow-lg');
+            btnExport.classList.add('bg-primary', 'hover:bg-primary-hover', 'text-white');
 
-            // Grid
             const grid = document.getElementById('blocks-grid');
             grid.innerHTML = '';
 
             state.finalBlocks.forEach(block => {
+                // Cálculo de percentual de uso dos limites (para visualização)
+                const pctCodes = Math.round((block.stats.uniqueCodes.size / parseInt(document.getElementById('limiteCodigos').value)) * 100);
+                const pctSectors = Math.round((block.stats.uniqueSectors.size / parseInt(document.getElementById('limiteSetores').value)) * 100);
+                
+                // Cor de alerta se estiver perto do limite
+                const codeColor = pctCodes > 90 ? 'text-red-600 bg-red-50' : 'text-blue-700 bg-blue-50';
+                
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in';
                 
@@ -383,26 +433,33 @@
                     <div class="bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h4 class="font-bold text-gray-800 text-lg">Bloco #${block.id}</h4>
-                            <span class="text-xs text-gray-500">${block.boxes.length} Caixas</span>
+                            <span class="text-xs text-gray-500 font-mono">${block.boxes.length} Caixas</span>
                         </div>
-                        <div class="flex gap-2 text-xs font-bold">
-                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">${block.stats.pages.toLocaleString()} pgs</span>
-                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded">${block.stats.uniqueCodes.size} tipos</span>
+                        <div class="flex gap-2 text-[10px] font-bold uppercase">
+                            <div class="px-2 py-1 rounded ${codeColor} border border-blue-100 flex flex-col items-center">
+                                <span>${block.stats.uniqueCodes.size} Códigos</span>
+                                <span class="text-[9px] opacity-70">${pctCodes}% Uso</span>
+                            </div>
+                            <div class="px-2 py-1 rounded bg-purple-50 text-purple-700 border border-purple-100 flex flex-col items-center">
+                                <span>${block.stats.uniqueSectors.size} Setores</span>
+                                <span class="text-[9px] opacity-70">${pctSectors}% Uso</span>
+                            </div>
                         </div>
                     </div>
                     <div class="p-4">
-                        <div class="max-h-32 overflow-y-auto grid grid-cols-5 gap-2 text-center">
-                            ${block.boxes.map(b => `<div class="bg-primary/10 text-primary-hover text-[11px] font-bold py-1 px-1 rounded border border-primary/20 truncate" title="${b.totalPaginas} págs">${b.id}</div>`).join('')}
+                        <div class="max-h-32 overflow-y-auto flex flex-wrap gap-1 justify-center">
+                            ${block.boxes.map(b => `<span class="bg-white text-gray-600 text-[10px] font-bold py-1 px-2 rounded border border-gray-200 shadow-sm">${b.id}</span>`).join('')}
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
 
-            // Log de Erros
             if (state.rejected.length > 0) {
                 document.getElementById('error-log').classList.remove('hidden');
                 document.getElementById('error-list').innerHTML = state.rejected.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
+            } else {
+                document.getElementById('error-log').classList.add('hidden');
             }
         }
 
@@ -426,7 +483,7 @@
 
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Resultado Otimizado");
+            XLSX.utils.book_append_sheet(wb, ws, "Resultado");
             XLSX.writeFile(wb, "Otimizacao_Eliminacao.xlsx");
         }
     </script>
