@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação (Dual Input) | Hub.Doc</title>
+    <title>Otimizador de Eliminação (Coordenadas Fixas) | Hub.Doc</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,19 +35,11 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        /* Inputs Personalizados */
-        .hub-input {
-            width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px;
-            font-weight: 600; color: #1f2937; text-align: center; transition: all 0.2s;
-        }
+        .hub-input { width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-weight: 600; color: #1f2937; text-align: center; transition: all 0.2s; }
         .hub-input:focus { border-color: #f7931e; outline: none; box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.1); }
         .hub-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
 
-        /* Cards de Upload */
-        .upload-card {
-            border: 2px dashed #e5e7eb; border-radius: 12px; padding: 24px; text-align: center;
-            cursor: pointer; transition: all 0.3s; background: white; position: relative; overflow: hidden;
-        }
+        .upload-card { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; position: relative; overflow: hidden; }
         .upload-card:hover { border-color: #f7931e; background-color: #fffbf7; transform: translateY(-2px); }
         .upload-card.loaded { border-style: solid; border-color: #10b981; background-color: #f0fdf4; }
         
@@ -69,13 +61,7 @@
             </div>
             
             <nav class="mt-8 px-4 space-y-3">
-                <a href="index.html" class="w-full text-left px-4 py-3 rounded border border-gray-600 hover:bg-gray-700 text-gray-300 hover:text-white transition flex items-center gap-3 mb-6">
-                    <i class="fa-solid fa-arrow-left w-5 text-primary"></i> <span class="font-medium text-sm">Voltar ao Hub</span>
-                </a>
-                
-                <div class="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest font-bold border-b border-gray-700 mb-2">Controle</div>
-                
-                <button onclick="resetAll()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
+                <button onclick="location.reload()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
                     <i class="fa-solid fa-rotate-right w-5"></i> <span class="font-medium text-sm">Reiniciar</span>
                 </button>
 
@@ -96,9 +82,8 @@
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
                     <i class="fa-solid fa-layer-group text-primary text-xl"></i> Otimizador Dual Input
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Cruzamento de Detalhes + Totais</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Leitura Fixa: Detalhes (K,E,Q) & Totais (A,I)</p>
             </div>
-            <div id="crossCheckStatus" class="hidden px-3 py-1 rounded text-xs font-bold uppercase"></div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 fade-in scroll-smooth">
@@ -132,16 +117,16 @@
                 
                 <div class="upload-card" id="cardDetails" onclick="document.getElementById('inputDetails').click()">
                     <i class="fa-solid fa-list-check upload-icon" id="iconDetails"></i>
-                    <h3 class="font-bold text-gray-700">1. Planilha de Detalhes</h3>
-                    <p class="text-xs text-gray-400 mt-1" id="textDetails">Contém Box, Código e Setor</p>
-                    <input type="file" id="inputDetails" accept=".xlsx, .xls" class="hidden" onchange="handleFile(this, 'details')">
+                    <h3 class="font-bold text-gray-700">1. Planilha de Elimináveis</h3>
+                    <p class="text-xs text-gray-400 mt-1" id="textDetails">Box (K), Setor (E), Código (Q)<br>Início: Linha 2</p>
+                    <input type="file" id="inputDetails" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'details')">
                 </div>
 
                 <div class="upload-card" id="cardTotals" onclick="document.getElementById('inputTotals').click()">
                     <i class="fa-solid fa-calculator upload-icon" id="iconTotals"></i>
                     <h3 class="font-bold text-gray-700">2. Planilha de Totais</h3>
-                    <p class="text-xs text-gray-400 mt-1" id="textTotals">Contém Box e Qtd/Páginas</p>
-                    <input type="file" id="inputTotals" accept=".xlsx, .xls" class="hidden" onchange="handleFile(this, 'totals')">
+                    <p class="text-xs text-gray-400 mt-1" id="textTotals">Box (A), Total (I)<br>Início: Linha 4</p>
+                    <input type="file" id="inputTotals" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'totals')">
                 </div>
 
             </div>
@@ -156,7 +141,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white p-5 rounded-lg border-l-4 border-gray-800 shadow-sm">
-                        <span class="text-xs font-bold text-gray-400 uppercase">Caixas Reconhecidas</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase">Total Bruto</span>
                         <div class="text-2xl font-bold text-gray-800 mt-1" id="kpiInput">0</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border-l-4 border-primary shadow-sm">
@@ -181,7 +166,7 @@
                         <ul class="list-disc pl-5 text-xs text-orange-700 max-h-40 overflow-y-auto" id="complexList"></ul>
                     </div>
                     <div id="errorLog" class="hidden bg-red-50 border border-red-200 p-5 rounded-lg">
-                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento (Box não encontrado)</h4>
+                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento</h4>
                         <ul class="list-disc pl-5 text-xs text-red-700 max-h-40 overflow-y-auto" id="errorList"></ul>
                     </div>
                 </div>
@@ -198,15 +183,15 @@
     <script>
         // ESTADO GLOBAL
         let state = {
-            dataDetails: [], // Dados Brutos (Box, Cod, Setor)
-            dataTotals: [],  // Dados Brutos (Box, Qtd)
-            mergedBoxes: [], // Dados Cruzados
-            finalBlocks: [], // Resultado
-            rejected: [],    // Erro de cruzamento ou 0 pags
-            complex: []      // Erro de otimização
+            dataDetails: [], // Armazena linhas brutas da planilha de detalhes
+            dataTotals: [],  // Armazena linhas brutas da planilha de totais
+            mergedBoxes: [], // Objetos cruzados
+            finalBlocks: [], 
+            rejected: [],
+            complex: []
         };
 
-        // 1. GERENCIADOR DE UPLOAD
+        // 1. GERENCIADOR DE UPLOAD (LEITURA RAW)
         function handleFile(input, type) {
             if (input.files.length === 0) return;
             document.getElementById('loader').classList.remove('hidden');
@@ -218,18 +203,16 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    let allRows = [];
-                    workbook.SheetNames.forEach(name => {
-                        const sheet = workbook.Sheets[name];
-                        allRows = allRows.concat(XLSX.utils.sheet_to_json(sheet, { defval: "" }));
-                    });
+                    // Lê a primeira aba como Matriz de Arrays (header:1) para pegar por índice
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
 
                     if (type === 'details') {
-                        state.dataDetails = allRows;
-                        updateCardStatus('Details', file.name, allRows.length);
+                        state.dataDetails = rawData;
+                        updateCardStatus('Details', file.name, rawData.length);
                     } else {
-                        state.dataTotals = allRows;
-                        updateCardStatus('Totals', file.name, allRows.length);
+                        state.dataTotals = rawData;
+                        updateCardStatus('Totals', file.name, rawData.length);
                     }
 
                     checkReady();
@@ -255,88 +238,96 @@
         function checkReady() {
             if (state.dataDetails.length > 0 && state.dataTotals.length > 0) {
                 document.getElementById('actionArea').classList.remove('hidden');
-                document.getElementById('statusText').innerText = "Arquivos prontos. Inicie o cruzamento.";
+                document.getElementById('statusText').innerText = "Arquivos carregados. Pronto para cruzar.";
             }
         }
 
-        // 2. CRUZAMENTO DE DADOS (MERGE)
+        // 2. CRUZAMENTO DE DADOS (COORDENADAS FIXAS)
         function processarCruzamento() {
             document.getElementById('loader').classList.remove('hidden');
             setTimeout(() => {
                 const boxesMap = new Map();
-                const orphans = [];
-
-                // Passo A: Processar Detalhes (Define o conteúdo)
-                state.dataDetails.forEach(row => {
-                    const kBox = Object.keys(row).find(k => k.match(/box|caixa/i));
-                    const kSetor = Object.keys(row).find(k => k.match(/setor|origem/i));
-                    const kCod = Object.keys(row).find(k => k.match(/cod|assunto|tipo/i));
-
-                    if (!kBox || !row[kBox]) return;
-
-                    const boxId = String(row[kBox]).trim();
-                    const setor = String(row[kSetor] || "GERAL").toUpperCase().trim();
-                    const cod = String(row[kCod] || "OUTROS").toUpperCase().trim();
-
-                    if (!boxesMap.has(boxId)) {
-                        boxesMap.set(boxId, {
-                            id: boxId,
-                            documentos: [],
-                            totalPaginas: 0, // Será preenchido pelo arq Totais
-                            setores: new Set(),
-                            codigos: new Set()
-                        });
-                    }
-                    const box = boxesMap.get(boxId);
-                    box.documentos.push({ SETOR: setor, COD: cod });
-                    box.setores.add(setor);
-                    box.codigos.add(cod);
-                });
-
-                // Passo B: Processar Totais (Define o peso/páginas)
-                // Cria um mapa auxiliar para busca rápida de totais
-                const totalsMap = new Map();
-                state.dataTotals.forEach(row => {
-                    const kBox = Object.keys(row).find(k => k.match(/box|caixa/i));
-                    const kPag = Object.keys(row).find(k => k.match(/total|pag|folha|qtd/i));
-                    
-                    if (kBox && row[kBox] && kPag) {
-                        const id = String(row[kBox]).trim();
-                        const qtd = parseInt(row[kPag]) || 0;
-                        // Soma se houver duplicidade na planilha de totais
-                        totalsMap.set(id, (totalsMap.get(id) || 0) + qtd);
-                    }
-                });
-
-                // Passo C: Unificação
-                const validBoxes = [];
                 const errors = [];
 
+                // --- A. Processar Elimináveis (Detalhes) ---
+                // Config: Início Linha 2 (Index 1). Box=K(10), Setor=E(4), Cod=Q(16)
+                const rowsDet = state.dataDetails;
+                for (let i = 1; i < rowsDet.length; i++) { // Começa do index 1 (Linha 2)
+                    const row = rowsDet[i];
+                    if (!row) continue;
+
+                    const boxIdRaw = row[10]; // Coluna K
+                    const setorRaw = row[4];  // Coluna E
+                    const codRaw = row[16];   // Coluna Q
+
+                    if (boxIdRaw !== undefined && boxIdRaw !== null && String(boxIdRaw).trim() !== "") {
+                        const boxId = String(boxIdRaw).trim();
+                        const setor = String(setorRaw || "GERAL").toUpperCase().trim();
+                        const cod = String(codRaw || "OUTROS").toUpperCase().trim();
+
+                        if (!boxesMap.has(boxId)) {
+                            boxesMap.set(boxId, {
+                                id: boxId,
+                                documentos: [],
+                                totalPaginas: 0, 
+                                setores: new Set(),
+                                codigos: new Set()
+                            });
+                        }
+                        const box = boxesMap.get(boxId);
+                        box.documentos.push({ SETOR: setor, COD: cod });
+                        box.setores.add(setor);
+                        box.codigos.add(cod);
+                    }
+                }
+
+                // --- B. Processar Totais ---
+                // Config: Início Linha 4 (Index 3). Box=A(0), Total=I(8)
+                const totalsMap = new Map();
+                const rowsTot = state.dataTotals;
+                for (let i = 3; i < rowsTot.length; i++) { // Começa do index 3 (Linha 4)
+                    const row = rowsTot[i];
+                    if (!row) continue;
+
+                    const boxIdRaw = row[0]; // Coluna A
+                    const totalRaw = row[8]; // Coluna I
+
+                    if (boxIdRaw !== undefined && boxIdRaw !== null) {
+                        const id = String(boxIdRaw).trim();
+                        const qtd = parseInt(totalRaw) || 0;
+                        // Acumula se houver duplicidade na planilha de totais
+                        totalsMap.set(id, (totalsMap.get(id) || 0) + qtd);
+                    }
+                }
+
+                // --- C. Unificação (Match) ---
+                const validBoxes = [];
+                
                 boxesMap.forEach(box => {
-                    // Busca o total na planilha de totais
                     if (totalsMap.has(box.id)) {
                         box.totalPaginas = totalsMap.get(box.id);
                         
                         if (box.totalPaginas > 0) {
                             validBoxes.push(box);
                         } else {
-                            errors.push({ id: box.id, motivo: "Box encontrado mas com 0 páginas/documentos" });
+                            errors.push({ id: box.id, motivo: "Box encontrado mas Total = 0" });
                         }
                     } else {
-                        // Box existe no detalhe mas não tem total correspondente
-                        errors.push({ id: box.id, motivo: "Box presente nos detalhes mas SEM TOTAL correspondente" });
+                        // Box existe na lista de detalhes mas não na de totais
+                        errors.push({ id: box.id, motivo: "Box sem registro na planilha de Totais" });
                     }
                 });
 
                 state.mergedBoxes = validBoxes;
                 state.rejected = errors;
 
+                // Segue para otimização
                 optimizeBlocks();
 
             }, 100);
         }
 
-        // 3. OTIMIZAÇÃO (CORE)
+        // 3. OTIMIZAÇÃO
         function optimizeBlocks() {
             const LIMITS = {
                 maxBoxes: parseInt(document.getElementById('maxBoxes').value) || 25,
@@ -349,7 +340,7 @@
             const blocks = [];
             const complexList = [];
 
-            // Ordenação: Prioriza Volume (Páginas Decrescente)
+            // Ordenação: Volume Decrescente (Tenta encaixar as maiores primeiro)
             boxesToAllocate.sort((a, b) => b.totalPaginas - a.totalPaginas);
 
             let currentBlockId = 1;
@@ -392,7 +383,6 @@
 
             state.finalBlocks = blocks;
             state.complex = complexList;
-            
             renderResults();
         }
 
@@ -418,21 +408,19 @@
             document.getElementById('actionArea').classList.add('hidden');
             document.getElementById('resultsArea').classList.remove('hidden');
 
-            // KPIs
             const totalAllocated = state.finalBlocks.reduce((acc, b) => acc + b.boxes.length, 0);
-            
+
+            // KPIs
             document.getElementById('kpiInput').innerText = state.mergedBoxes.length + state.rejected.length;
             document.getElementById('kpiBlocks').innerText = state.finalBlocks.length;
             document.getElementById('kpiAllocated').innerText = totalAllocated;
             document.getElementById('kpiRejected').innerText = state.rejected.length + state.complex.length;
 
-            // Ativar Export
             const btnExport = document.getElementById('btnExport');
             btnExport.disabled = false;
             btnExport.classList.remove('bg-gray-700', 'cursor-not-allowed', 'text-gray-400');
             btnExport.classList.add('bg-primary', 'hover:bg-primary-hover', 'text-white', 'shadow-lg');
 
-            // Grid
             const grid = document.getElementById('resultsGrid');
             grid.innerHTML = '';
             const limitCodes = parseInt(document.getElementById('maxCodes').value);
@@ -466,7 +454,7 @@
                 grid.appendChild(card);
             });
 
-            // Erros
+            // Logs
             if (state.complex.length > 0) {
                 document.getElementById('complexLog').classList.remove('hidden');
                 document.getElementById('complexList').innerHTML = state.complex.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
@@ -477,7 +465,7 @@
             }
         }
 
-        // 5. EXPORTAR
+        // 5. EXPORTAÇÃO
         function exportarExcel() {
             if(!state.finalBlocks.length) return;
             const wb = XLSX.utils.book_new();
@@ -499,12 +487,5 @@
 
             const ws = XLSX.utils.json_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Resultado");
-            XLSX.writeFile(wb, "Otimizacao_Dual_Input.xlsx");
+            XLSX.writeFile(wb, "Resultado_Eliminacao.xlsx");
         }
-
-        function resetAll() {
-            location.reload();
-        }
-    </script>
-</body>
-</html>
