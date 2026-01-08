@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação (Coordenadas Fixas) | Hub.Doc</title>
+    <title>Otimizador de Eliminação | Hub.Doc</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,16 +35,14 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        .hub-input { width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-weight: 600; color: #1f2937; text-align: center; transition: all 0.2s; }
-        .hub-input:focus { border-color: #f7931e; outline: none; box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.1); }
-        .hub-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
+        .hub-input { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-weight: 600; color: #1f2937; text-align: center; }
+        .hub-input:focus { border-color: #f7931e; outline: none; ring: 2px solid rgba(247, 147, 30, 0.1); }
+        .hub-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; }
 
-        .upload-card { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; position: relative; overflow: hidden; }
+        .upload-card { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
         .upload-card:hover { border-color: #f7931e; background-color: #fffbf7; transform: translateY(-2px); }
         .upload-card.loaded { border-style: solid; border-color: #10b981; background-color: #f0fdf4; }
-        
-        .upload-icon { font-size: 2rem; color: #d1d5db; margin-bottom: 12px; transition: color 0.3s; }
-        .upload-card:hover .upload-icon { color: #f7931e; }
+        .upload-icon { font-size: 2rem; color: #d1d5db; margin-bottom: 10px; }
         .upload-card.loaded .upload-icon { color: #10b981; }
 
         .fade-in { animation: fadeIn 0.4s ease-out; }
@@ -82,7 +80,7 @@
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
                     <i class="fa-solid fa-layer-group text-primary text-xl"></i> Otimizador Dual Input
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Leitura Fixa: Detalhes (K,E,Q) & Totais (A,I)</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Leitura Estrita: Detalhes (K, E, Q) & Totais (A, I)</p>
             </div>
         </header>
 
@@ -91,44 +89,38 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
                 <div class="flex items-center gap-2 mb-4 border-b pb-2">
                     <i class="fa-solid fa-sliders text-primary"></i>
-                    <h3 class="text-sm font-bold text-gray-700 uppercase">Parâmetros de Restrição</h3>
+                    <h3 class="text-sm font-bold text-gray-700 uppercase">Restrições</h3>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="hub-label">Máx. Caixas / Bloco</label>
-                        <input type="number" id="maxBoxes" value="25" class="hub-input">
-                    </div>
-                    <div>
-                        <label class="hub-label">Máx. Páginas / Bloco</label>
-                        <input type="number" id="maxPages" value="5000" class="hub-input">
-                    </div>
-                    <div>
-                        <label class="hub-label">Máx. Códigos (Assuntos)</label>
+                        <label class="hub-label">Máx. Códigos Distintos</label>
                         <input type="number" id="maxCodes" value="30" class="hub-input">
                     </div>
                     <div>
-                        <label class="hub-label">Máx. Setores Origem</label>
+                        <label class="hub-label">Máx. Setores Distintos</label>
                         <input type="number" id="maxSectors" value="12" class="hub-input">
+                    </div>
+                    <div>
+                        <label class="hub-label">Limite Físico (Caixas/Bloco)</label>
+                        <input type="number" id="maxBoxes" value="30" class="hub-input" title="Limite físico para o bloco não ficar gigante">
                     </div>
                 </div>
             </div>
 
             <div id="uploadContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                
                 <div class="upload-card" id="cardDetails" onclick="document.getElementById('inputDetails').click()">
                     <i class="fa-solid fa-list-check upload-icon" id="iconDetails"></i>
-                    <h3 class="font-bold text-gray-700">1. Planilha de Elimináveis</h3>
-                    <p class="text-xs text-gray-400 mt-1" id="textDetails">Box (K), Setor (E), Código (Q)<br>Início: Linha 2</p>
+                    <h3 class="font-bold text-gray-700">1. Planilha de Detalhes</h3>
+                    <p class="text-xs text-gray-400 mt-1">Lê colunas K (Box), E (Setor), Q (Cód)<br>A partir da linha 2</p>
                     <input type="file" id="inputDetails" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'details')">
                 </div>
 
                 <div class="upload-card" id="cardTotals" onclick="document.getElementById('inputTotals').click()">
                     <i class="fa-solid fa-calculator upload-icon" id="iconTotals"></i>
                     <h3 class="font-bold text-gray-700">2. Planilha de Totais</h3>
-                    <p class="text-xs text-gray-400 mt-1" id="textTotals">Box (A), Total (I)<br>Início: Linha 4</p>
+                    <p class="text-xs text-gray-400 mt-1">Lê colunas A (Box), I (Total)<br>A partir da linha 4</p>
                     <input type="file" id="inputTotals" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'totals')">
                 </div>
-
             </div>
 
             <div id="actionArea" class="hidden text-center mb-8 fade-in">
@@ -138,7 +130,6 @@
             </div>
 
             <div id="resultsArea" class="hidden space-y-8 fade-in">
-                
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white p-5 rounded-lg border-l-4 border-gray-800 shadow-sm">
                         <span class="text-xs font-bold text-gray-400 uppercase">Total Bruto</span>
@@ -166,7 +157,7 @@
                         <ul class="list-disc pl-5 text-xs text-orange-700 max-h-40 overflow-y-auto" id="complexList"></ul>
                     </div>
                     <div id="errorLog" class="hidden bg-red-50 border border-red-200 p-5 rounded-lg">
-                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento</h4>
+                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento / Leitura</h4>
                         <ul class="list-disc pl-5 text-xs text-red-700 max-h-40 overflow-y-auto" id="errorList"></ul>
                     </div>
                 </div>
@@ -174,24 +165,15 @@
 
             <div id="loader" class="hidden fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest animate-pulse">Processando Algoritmo...</p>
+                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest animate-pulse">Processando...</p>
             </div>
-
         </div>
     </main>
 
     <script>
-        // ESTADO GLOBAL
-        let state = {
-            dataDetails: [], // Armazena linhas brutas da planilha de detalhes
-            dataTotals: [],  // Armazena linhas brutas da planilha de totais
-            mergedBoxes: [], // Objetos cruzados
-            finalBlocks: [], 
-            rejected: [],
-            complex: []
-        };
+        let state = { dataDetails: [], dataTotals: [], mergedBoxes: [], finalBlocks: [], rejected: [], complex: [] };
 
-        // 1. GERENCIADOR DE UPLOAD (LEITURA RAW)
+        // 1. LEITURA ESTRITA DE ARQUIVOS
         function handleFile(input, type) {
             if (input.files.length === 0) return;
             document.getElementById('loader').classList.remove('hidden');
@@ -203,19 +185,40 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    // Lê a primeira aba como Matriz de Arrays (header:1) para pegar por índice
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
 
-                    if (type === 'details') {
-                        state.dataDetails = rawData;
-                        updateCardStatus('Details', file.name, rawData.length);
+                    // Leitura Específica
+                    let parsedData = [];
+                    if(type === 'details') {
+                        // Começa da linha 2 (K2, E2, Q2). Em índice, linha 2 é "1" se base 0?
+                        // Vamos usar "range" para garantir.
+                        // K é coluna 10. E é 4. Q é 16.
+                        // SheetJS range: { s: {r:1, c:0}, e: ... } -> s=Start, r=Row (0-based)
+                        // Linha 2 do Excel = Row Index 1.
+                        const range = XLSX.utils.decode_range(sheet['!ref']);
+                        range.s.r = 1; // Pula a linha 1 (cabeçalho)
+                        
+                        // Lê tudo como array de arrays
+                        const opts = { header: 1, range: range, defval: "" };
+                        parsedData = XLSX.utils.sheet_to_json(sheet, opts);
                     } else {
-                        state.dataTotals = rawData;
-                        updateCardStatus('Totals', file.name, rawData.length);
+                        // Totais: Começa da linha 4 (A4, I4). Row Index 3.
+                        const range = XLSX.utils.decode_range(sheet['!ref']);
+                        range.s.r = 3; // Pula linhas 1, 2, 3
+                        const opts = { header: 1, range: range, defval: "" };
+                        parsedData = XLSX.utils.sheet_to_json(sheet, opts);
                     }
 
+                    if (type === 'details') {
+                        state.dataDetails = parsedData;
+                        updateCardStatus('Details', file.name, parsedData.length);
+                    } else {
+                        state.dataTotals = parsedData;
+                        updateCardStatus('Totals', file.name, parsedData.length);
+                    }
                     checkReady();
+
                 } catch (err) {
                     alert("Erro ao ler arquivo: " + err.message);
                 } finally {
@@ -228,39 +231,38 @@
         function updateCardStatus(type, name, count) {
             const card = document.getElementById(`card${type}`);
             const icon = document.getElementById(`icon${type}`);
-            const text = document.getElementById(`text${type}`);
             
             card.classList.add('loaded');
             icon.className = 'fa-solid fa-check-circle upload-icon';
-            text.innerHTML = `<strong>${name}</strong><br>${count} linhas lidas`;
+            // Debug info
+            console.log(`${type} loaded: ${count} rows`);
         }
 
         function checkReady() {
             if (state.dataDetails.length > 0 && state.dataTotals.length > 0) {
                 document.getElementById('actionArea').classList.remove('hidden');
-                document.getElementById('statusText').innerText = "Arquivos carregados. Pronto para cruzar.";
+                document.getElementById('statusText').innerText = "Arquivos prontos. Clique em Cruzar Dados.";
             }
         }
 
-        // 2. CRUZAMENTO DE DADOS (COORDENADAS FIXAS)
+        // 2. CRUZAMENTO (COORDENADAS EXATAS)
         function processarCruzamento() {
             document.getElementById('loader').classList.remove('hidden');
             setTimeout(() => {
                 const boxesMap = new Map();
                 const errors = [];
 
-                // --- A. Processar Elimináveis (Detalhes) ---
-                // Config: Início Linha 2 (Index 1). Box=K(10), Setor=E(4), Cod=Q(16)
-                const rowsDet = state.dataDetails;
-                for (let i = 1; i < rowsDet.length; i++) { // Começa do index 1 (Linha 2)
-                    const row = rowsDet[i];
-                    if (!row) continue;
+                // A. Detalhes: Box(K=index 10), Setor(E=index 4), Cod(Q=index 16)
+                // Como usamos 'range' começando da linha correta, o array começa do 0 relativo
+                state.dataDetails.forEach(row => {
+                    // Proteção contra linhas vazias
+                    if (!row || row.length < 5) return; 
 
-                    const boxIdRaw = row[10]; // Coluna K
-                    const setorRaw = row[4];  // Coluna E
-                    const codRaw = row[16];   // Coluna Q
+                    const boxIdRaw = row[10]; // K
+                    const setorRaw = row[4];  // E
+                    const codRaw = row[16];   // Q
 
-                    if (boxIdRaw !== undefined && boxIdRaw !== null && String(boxIdRaw).trim() !== "") {
+                    if (boxIdRaw) {
                         const boxId = String(boxIdRaw).trim();
                         const setor = String(setorRaw || "GERAL").toUpperCase().trim();
                         const cod = String(codRaw || "OUTROS").toUpperCase().trim();
@@ -269,7 +271,7 @@
                             boxesMap.set(boxId, {
                                 id: boxId,
                                 documentos: [],
-                                totalPaginas: 0, 
+                                totalPaginas: 0,
                                 setores: new Set(),
                                 codigos: new Set()
                             });
@@ -279,68 +281,62 @@
                         box.setores.add(setor);
                         box.codigos.add(cod);
                     }
+                });
+
+                if (boxesMap.size === 0) {
+                    alert("Atenção: Nenhuma caixa identificada na coluna K da planilha de detalhes. Verifique se o arquivo está correto.");
                 }
 
-                // --- B. Processar Totais ---
-                // Config: Início Linha 4 (Index 3). Box=A(0), Total=I(8)
+                // B. Totais: Box(A=index 0), Total(I=index 8)
                 const totalsMap = new Map();
-                const rowsTot = state.dataTotals;
-                for (let i = 3; i < rowsTot.length; i++) { // Começa do index 3 (Linha 4)
-                    const row = rowsTot[i];
-                    if (!row) continue;
+                state.dataTotals.forEach(row => {
+                    if (!row || row.length < 1) return;
+                    
+                    const boxIdRaw = row[0]; // A
+                    const totalRaw = row[8]; // I
 
-                    const boxIdRaw = row[0]; // Coluna A
-                    const totalRaw = row[8]; // Coluna I
-
-                    if (boxIdRaw !== undefined && boxIdRaw !== null) {
+                    if (boxIdRaw) {
                         const id = String(boxIdRaw).trim();
-                        const qtd = parseInt(totalRaw) || 0;
-                        // Acumula se houver duplicidade na planilha de totais
-                        totalsMap.set(id, (totalsMap.get(id) || 0) + qtd);
+                        const val = parseInt(totalRaw) || 0;
+                        totalsMap.set(id, (totalsMap.get(id) || 0) + val);
                     }
-                }
+                });
 
-                // --- C. Unificação (Match) ---
+                // C. Match
                 const validBoxes = [];
-                
                 boxesMap.forEach(box => {
                     if (totalsMap.has(box.id)) {
                         box.totalPaginas = totalsMap.get(box.id);
-                        
-                        if (box.totalPaginas > 0) {
+                        if(box.totalPaginas > 0) {
                             validBoxes.push(box);
                         } else {
-                            errors.push({ id: box.id, motivo: "Box encontrado mas Total = 0" });
+                            errors.push({ id: box.id, motivo: "Box encontrado mas com Total = 0" });
                         }
                     } else {
-                        // Box existe na lista de detalhes mas não na de totais
-                        errors.push({ id: box.id, motivo: "Box sem registro na planilha de Totais" });
+                        errors.push({ id: box.id, motivo: "Sem correspondência na planilha de Totais" });
                     }
                 });
 
                 state.mergedBoxes = validBoxes;
                 state.rejected = errors;
-
-                // Segue para otimização
                 optimizeBlocks();
 
             }, 100);
         }
 
-        // 3. OTIMIZAÇÃO
+        // 3. OTIMIZAÇÃO (SEM LIMITE DE PÁGINAS)
         function optimizeBlocks() {
-            const LIMITS = {
-                maxBoxes: parseInt(document.getElementById('maxBoxes').value) || 25,
-                maxPages: parseInt(document.getElementById('maxPages').value) || 5000,
-                maxCodes: parseInt(document.getElementById('maxCodes').value) || 30,
-                maxSectors: parseInt(document.getElementById('maxSectors').value) || 12
-            };
+            const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 30;
+            const maxCodes = parseInt(document.getElementById('maxCodes').value) || 30;
+            const maxSectors = parseInt(document.getElementById('maxSectors').value) || 12;
 
             let boxesToAllocate = [...state.mergedBoxes];
             const blocks = [];
             const complexList = [];
 
-            // Ordenação: Volume Decrescente (Tenta encaixar as maiores primeiro)
+            // Ordena por Quantidade de Códigos (Complexidade crescente) para tentar agrupar melhor
+            // Ou por Volume decrescente? O usuário pediu apenas restrições de código/setor.
+            // Vamos priorizar encher a caixa.
             boxesToAllocate.sort((a, b) => b.totalPaginas - a.totalPaginas);
 
             let currentBlockId = 1;
@@ -349,7 +345,7 @@
                 let currentBlock = {
                     id: currentBlockId++,
                     boxes: [],
-                    stats: { pages: 0, uniqueCodes: new Set(), uniqueSectors: new Set() }
+                    stats: { uniqueCodes: new Set(), uniqueSectors: new Set() }
                 };
 
                 let remainingBoxes = [];
@@ -357,25 +353,40 @@
                 for (let i = 0; i < boxesToAllocate.length; i++) {
                     const box = boxesToAllocate[i];
 
-                    if (checkConstraints(currentBlock, box, LIMITS)) {
-                        currentBlock.boxes.push(box);
-                        currentBlock.stats.pages += box.totalPaginas;
-                        box.codigos.forEach(c => currentBlock.stats.uniqueCodes.add(c));
-                        box.setores.forEach(s => currentBlock.stats.uniqueSectors.add(s));
-                    } else {
+                    // CHECK CONSTRAINTS
+                    // 1. Max Boxes (Físico)
+                    if (currentBlock.boxes.length >= maxBoxes) {
                         remainingBoxes.push(box);
+                        continue;
                     }
+                    
+                    // 2. Max Códigos
+                    let tempCodes = new Set(currentBlock.stats.uniqueCodes);
+                    box.codigos.forEach(c => tempCodes.add(c));
+                    if (tempCodes.size > maxCodes) {
+                        remainingBoxes.push(box);
+                        continue;
+                    }
+
+                    // 3. Max Setores
+                    let tempSectors = new Set(currentBlock.stats.uniqueSectors);
+                    box.setores.forEach(s => tempSectors.add(s));
+                    if (tempSectors.size > maxSectors) {
+                        remainingBoxes.push(box);
+                        continue;
+                    }
+
+                    // Approved
+                    currentBlock.boxes.push(box);
+                    box.codigos.forEach(c => currentBlock.stats.uniqueCodes.add(c));
+                    box.setores.forEach(s => currentBlock.stats.uniqueSectors.add(s));
                 }
 
                 if (currentBlock.boxes.length > 0) {
                     blocks.push(currentBlock);
                 } else {
-                    remainingBoxes.forEach(b => {
-                        complexList.push({ 
-                            id: b.id, 
-                            motivo: `Sozinha excede: ${b.codigos.size} Cód ou ${b.setores.size} Setores` 
-                        });
-                    });
+                    // Loop infinito breaker
+                    remainingBoxes.forEach(b => complexList.push({ id: b.id, motivo: `Sozinha excede: ${b.codigos.size} Cód ou ${b.setores.size} Setores` }));
                     break;
                 }
                 boxesToAllocate = remainingBoxes;
@@ -386,22 +397,7 @@
             renderResults();
         }
 
-        function checkConstraints(block, box, limits) {
-            if (block.boxes.length + 1 > limits.maxBoxes) return false;
-            if (block.stats.pages + box.totalPaginas > limits.maxPages) return false;
-            
-            let tempCodes = new Set(block.stats.uniqueCodes);
-            box.codigos.forEach(c => tempCodes.add(c));
-            if (tempCodes.size > limits.maxCodes) return false;
-
-            let tempSectors = new Set(block.stats.uniqueSectors);
-            box.setores.forEach(s => tempSectors.add(s));
-            if (tempSectors.size > limits.maxSectors) return false;
-
-            return true;
-        }
-
-        // 4. RENDERIZAÇÃO
+        // 4. RENDER
         function renderResults() {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('uploadContainer').classList.add('hidden');
@@ -410,7 +406,6 @@
 
             const totalAllocated = state.finalBlocks.reduce((acc, b) => acc + b.boxes.length, 0);
 
-            // KPIs
             document.getElementById('kpiInput').innerText = state.mergedBoxes.length + state.rejected.length;
             document.getElementById('kpiBlocks').innerText = state.finalBlocks.length;
             document.getElementById('kpiAllocated').innerText = totalAllocated;
@@ -418,7 +413,7 @@
 
             const btnExport = document.getElementById('btnExport');
             btnExport.disabled = false;
-            btnExport.classList.remove('bg-gray-700', 'cursor-not-allowed', 'text-gray-400');
+            btnExport.classList.remove('bg-gray-700', 'cursor-not-allowed');
             btnExport.classList.add('bg-primary', 'hover:bg-primary-hover', 'text-white', 'shadow-lg');
 
             const grid = document.getElementById('resultsGrid');
@@ -427,7 +422,7 @@
 
             state.finalBlocks.forEach(block => {
                 const pct = Math.round((block.stats.uniqueCodes.size / limitCodes) * 100);
-                const barColor = pct > 90 ? 'bg-red-500' : 'bg-primary';
+                const barColor = pct > 100 ? 'bg-red-500' : 'bg-primary';
 
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in';
@@ -435,7 +430,7 @@
                     <div class="bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
                             <h4 class="font-bold text-gray-800 text-lg">Bloco #${block.id}</h4>
-                            <span class="text-xs text-gray-500 font-mono">${block.boxes.length} Caixas | ${block.stats.pages.toLocaleString()} Pgs</span>
+                            <span class="text-xs text-gray-500 font-mono">${block.boxes.length} Caixas</span>
                         </div>
                         <div class="text-right w-24">
                             <span class="text-[9px] font-bold uppercase text-gray-400 block mb-1">Complexidade</span>
@@ -454,7 +449,6 @@
                 grid.appendChild(card);
             });
 
-            // Logs
             if (state.complex.length > 0) {
                 document.getElementById('complexLog').classList.remove('hidden');
                 document.getElementById('complexList').innerHTML = state.complex.map(r => `<li><strong>Box ${r.id}:</strong> ${r.motivo}</li>`).join('');
@@ -465,12 +459,11 @@
             }
         }
 
-        // 5. EXPORTAÇÃO
+        // 5. EXPORTAR
         function exportarExcel() {
             if(!state.finalBlocks.length) return;
             const wb = XLSX.utils.book_new();
             const data = [];
-
             state.finalBlocks.forEach(b => {
                 b.boxes.forEach(box => {
                     box.documentos.forEach(doc => {
@@ -478,14 +471,15 @@
                             'Bloco': b.id,
                             'Box': box.id,
                             'Setor': doc.SETOR,
-                            'Código': doc.COD,
-                            'Páginas (Total)': box.totalPaginas
+                            'Código': doc.COD
                         });
                     });
                 });
             });
-
             const ws = XLSX.utils.json_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Resultado");
-            XLSX.writeFile(wb, "Resultado_Eliminacao.xlsx");
+            XLSX.writeFile(wb, "Otimizacao_Resultado.xlsx");
         }
+    </script>
+</body>
+</html>
