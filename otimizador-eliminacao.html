@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação (Lotes Grandes) | Hub.Doc</title>
+    <title>Otimizador de Lotes (Max Boxes) | Hub.Doc</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,6 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        
         .hub-input { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-weight: 600; color: #1f2937; text-align: center; }
         .hub-input:focus { border-color: #f7931e; outline: none; ring: 2px solid rgba(247, 147, 30, 0.1); }
         .hub-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; }
@@ -57,18 +56,15 @@
                 <h1 class="text-2xl font-light tracking-wide text-white">Hub<span class="font-bold text-primary">.Doc</span></h1>
                 <p class="text-[10px] text-gray-400 mt-2 font-light tracking-wider uppercase">Motor de Otimização</p>
             </div>
-            
             <nav class="mt-8 px-4 space-y-3">
                 <button onclick="location.reload()" class="w-full text-left px-4 py-3 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition flex items-center gap-3">
                     <i class="fa-solid fa-rotate-right w-5"></i> <span class="font-medium text-sm">Reiniciar</span>
                 </button>
-
                 <button onclick="exportarExcel()" id="btnExport" class="w-full text-left px-4 py-3 rounded bg-gray-700 text-gray-400 cursor-not-allowed transition flex items-center gap-3 mt-4" disabled>
                     <i class="fa-solid fa-file-excel w-5"></i> <span class="font-medium text-sm">Baixar Resultado</span>
                 </button>
             </nav>
         </div>
-        
         <div class="p-6 border-t border-gray-700 bg-gray-900/50">
             <div id="statusText" class="text-[10px] text-gray-400 text-center">Aguardando arquivos...</div>
         </div>
@@ -78,9 +74,9 @@
         <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10 shrink-0 h-20 shadow-sm">
             <div>
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
-                    <i class="fa-solid fa-cubes-stacked text-primary text-xl"></i> Otimizador de Lotes
+                    <i class="fa-solid fa-boxes-stacked text-primary text-xl"></i> Otimizador Max Boxes
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Algoritmo Ajustado: Lotes Grandes & Setores por Código</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Estratégia: Menor Complexidade Primeiro (Maximizar Lote)</p>
             </div>
         </header>
 
@@ -89,20 +85,20 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
                 <div class="flex items-center gap-2 mb-4 border-b pb-2">
                     <i class="fa-solid fa-sliders text-primary"></i>
-                    <h3 class="text-sm font-bold text-gray-700 uppercase">Parâmetros de Restrição</h3>
+                    <h3 class="text-sm font-bold text-gray-700 uppercase">Restrições</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="hub-label">Máx. Códigos Distintos (Assuntos)</label>
+                        <label class="hub-label">Máx. Códigos Distintos</label>
                         <input type="number" id="maxCodes" value="30" class="hub-input">
                     </div>
                     <div>
-                        <label class="hub-label">Máx. Setores por Código</label>
-                        <input type="number" id="maxSectors" value="12" class="hub-input" title="Quantos setores diferentes podem ter o mesmo código dentro do bloco">
+                        <label class="hub-label">Máx. Setores (Por Código)</label>
+                        <input type="number" id="maxSectors" value="12" class="hub-input">
                     </div>
                     <div>
-                        <label class="hub-label">Limite Caixas por Lote</label>
-                        <input type="number" id="maxBoxes" value="1000" class="hub-input" title="Aumentado para permitir lotes grandes">
+                        <label class="hub-label">Limite Físico (Caixas/Lote)</label>
+                        <input type="number" id="maxBoxes" value="2000" class="hub-input" title="Aumentado para permitir lotes gigantes">
                     </div>
                 </div>
             </div>
@@ -136,7 +132,7 @@
                         <div class="text-2xl font-bold text-gray-800 mt-1" id="kpiInput">0</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border-l-4 border-primary shadow-sm">
-                        <span class="text-xs font-bold text-gray-400 uppercase">Blocos (Lotes)</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase">Blocos Criados</span>
                         <div class="text-2xl font-bold text-primary mt-1" id="kpiBlocks">0</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border-l-4 border-success shadow-sm">
@@ -153,11 +149,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div id="complexLog" class="hidden bg-orange-50 border border-orange-200 p-5 rounded-lg">
-                        <h4 class="text-orange-800 font-bold text-sm mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Complexidade Alta (Não Alocadas)</h4>
+                        <h4 class="text-orange-800 font-bold text-sm mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Sobras (Complexidade Alta)</h4>
                         <ul class="list-disc pl-5 text-xs text-orange-700 max-h-40 overflow-y-auto" id="complexList"></ul>
                     </div>
                     <div id="errorLog" class="hidden bg-red-50 border border-red-200 p-5 rounded-lg">
-                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento / Leitura</h4>
+                        <h4 class="text-red-800 font-bold text-sm mb-2"><i class="fa-solid fa-link-slash"></i> Erro de Cruzamento</h4>
                         <ul class="list-disc pl-5 text-xs text-red-700 max-h-40 overflow-y-auto" id="errorList"></ul>
                     </div>
                 </div>
@@ -165,7 +161,7 @@
 
             <div id="loader" class="hidden fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest animate-pulse">Processando...</p>
+                <p class="mt-4 text-sm font-bold text-gray-600 uppercase tracking-widest animate-pulse">Otimizando...</p>
             </div>
         </div>
     </main>
@@ -242,7 +238,6 @@
                 // A. Detalhes (K, E, Q)
                 state.dataDetails.forEach(row => {
                     if (!row || row.length < 5) return; 
-
                     const boxIdRaw = row[10]; // K
                     const setorRaw = row[4];  // E
                     const codRaw = row[16];   // Q
@@ -259,15 +254,13 @@
                                 totalPaginas: 0,
                                 setores: new Set(),
                                 codigos: new Set(),
-                                sectorsPerCode: {} // MAPA CRUCIAL PARA A REGRA DE NEGÓCIO
+                                sectorsPerCode: {} // MAPA CRUCIAL
                             });
                         }
                         const box = boxesMap.get(boxId);
                         box.documentos.push({ SETOR: setor, COD: cod });
                         box.setores.add(setor);
                         box.codigos.add(cod);
-
-                        // Pré-processa Setores por Código na caixa
                         if (!box.sectorsPerCode[cod]) {
                             box.sectorsPerCode[cod] = new Set();
                         }
@@ -307,9 +300,9 @@
             }, 100);
         }
 
-        // 3. OTIMIZAÇÃO (CORRIGIDA PARA SETORES POR CÓDIGO)
+        // 3. OTIMIZAÇÃO (MAX BOXES)
         function optimizeBlocks() {
-            const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 1000;
+            const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 2000;
             const maxCodes = parseInt(document.getElementById('maxCodes').value) || 30;
             const maxSectorsPerCode = parseInt(document.getElementById('maxSectors').value) || 12;
 
@@ -317,8 +310,13 @@
             const blocks = [];
             const complexList = [];
 
-            // Ordena por Volume (maiores primeiro) para encher o lote
-            boxesToAllocate.sort((a, b) => b.totalPaginas - a.totalPaginas);
+            // ESTRATÉGIA CRUCIAL: MENOR COMPLEXIDADE PRIMEIRO
+            // 1. Menos códigos diferentes (mais fácil de encaixar)
+            // 2. Menos páginas (menos volume, cabe mais)
+            boxesToAllocate.sort((a, b) => {
+                if (a.codigos.size !== b.codigos.size) return a.codigos.size - b.codigos.size;
+                return a.totalPaginas - b.totalPaginas;
+            });
 
             let currentBlockId = 1;
 
@@ -328,7 +326,7 @@
                     boxes: [],
                     stats: { 
                         uniqueCodes: new Set(), 
-                        sectorsByCode: {} // MAPA NOVO: Código -> Set de Setores
+                        sectorsByCode: {} 
                     }
                 };
 
@@ -379,7 +377,6 @@
             if (tempCodes.size > maxCodes) return false;
 
             // 3. Limite Setores POR CÓDIGO (Específico)
-            // Para cada código que essa caixa traz, verificamos se estouraria o limite de setores daquele código
             for (let [cod, setoresDaCaixa] of Object.entries(box.sectorsPerCode)) {
                 let currentBlockSectors = block.stats.sectorsByCode[cod] || new Set();
                 
@@ -388,7 +385,6 @@
                 for (let s of setoresDaCaixa) {
                     if (!currentBlockSectors.has(s)) count++;
                 }
-
                 if (count > maxSectorsPerCode) return false;
             }
 
@@ -476,7 +472,7 @@
             });
             const ws = XLSX.utils.json_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Resultado");
-            XLSX.writeFile(wb, "Otimizacao_Resultado.xlsx");
+            XLSX.writeFile(wb, "Otimizacao_MaxBoxes.xlsx");
         }
     </script>
 </body>
