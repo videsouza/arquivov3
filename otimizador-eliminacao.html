@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Eliminação | Hub.Doc</title>
+    <title>Otimizador de Eliminação (Lotes Grandes) | Hub.Doc</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,9 +78,9 @@
         <header class="bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10 shrink-0 h-20 shadow-sm">
             <div>
                 <h2 class="text-2xl font-serif font-bold text-gray-800 flex items-center gap-3">
-                    <i class="fa-solid fa-layer-group text-primary text-xl"></i> Otimizador Dual Input
+                    <i class="fa-solid fa-cubes-stacked text-primary text-xl"></i> Otimizador de Lotes
                 </h2>
-                <p class="text-xs text-gray-500 font-sans mt-1">Leitura Estrita: Detalhes (K, E, Q) & Totais (A, I)</p>
+                <p class="text-xs text-gray-500 font-sans mt-1">Algoritmo Ajustado: Lotes Grandes & Setores por Código</p>
             </div>
         </header>
 
@@ -89,20 +89,20 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
                 <div class="flex items-center gap-2 mb-4 border-b pb-2">
                     <i class="fa-solid fa-sliders text-primary"></i>
-                    <h3 class="text-sm font-bold text-gray-700 uppercase">Restrições</h3>
+                    <h3 class="text-sm font-bold text-gray-700 uppercase">Parâmetros de Restrição</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="hub-label">Máx. Códigos Distintos</label>
+                        <label class="hub-label">Máx. Códigos Distintos (Assuntos)</label>
                         <input type="number" id="maxCodes" value="30" class="hub-input">
                     </div>
                     <div>
-                        <label class="hub-label">Máx. Setores Distintos</label>
-                        <input type="number" id="maxSectors" value="12" class="hub-input">
+                        <label class="hub-label">Máx. Setores por Código</label>
+                        <input type="number" id="maxSectors" value="12" class="hub-input" title="Quantos setores diferentes podem ter o mesmo código dentro do bloco">
                     </div>
                     <div>
-                        <label class="hub-label">Limite Físico (Caixas/Bloco)</label>
-                        <input type="number" id="maxBoxes" value="30" class="hub-input" title="Limite físico para o bloco não ficar gigante">
+                        <label class="hub-label">Limite Caixas por Lote</label>
+                        <input type="number" id="maxBoxes" value="1000" class="hub-input" title="Aumentado para permitir lotes grandes">
                     </div>
                 </div>
             </div>
@@ -110,15 +110,15 @@
             <div id="uploadContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="upload-card" id="cardDetails" onclick="document.getElementById('inputDetails').click()">
                     <i class="fa-solid fa-list-check upload-icon" id="iconDetails"></i>
-                    <h3 class="font-bold text-gray-700">1. Planilha de Detalhes</h3>
-                    <p class="text-xs text-gray-400 mt-1">Lê colunas K (Box), E (Setor), Q (Cód)<br>A partir da linha 2</p>
+                    <h3 class="font-bold text-gray-700">1. Planilha de Elimináveis</h3>
+                    <p class="text-xs text-gray-400 mt-1">Box (K), Setor (E), Código (Q)<br>Início: Linha 2</p>
                     <input type="file" id="inputDetails" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'details')">
                 </div>
 
                 <div class="upload-card" id="cardTotals" onclick="document.getElementById('inputTotals').click()">
                     <i class="fa-solid fa-calculator upload-icon" id="iconTotals"></i>
                     <h3 class="font-bold text-gray-700">2. Planilha de Totais</h3>
-                    <p class="text-xs text-gray-400 mt-1">Lê colunas A (Box), I (Total)<br>A partir da linha 4</p>
+                    <p class="text-xs text-gray-400 mt-1">Box (A), Total (I)<br>Início: Linha 4</p>
                     <input type="file" id="inputTotals" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFile(this, 'totals')">
                 </div>
             </div>
@@ -136,7 +136,7 @@
                         <div class="text-2xl font-bold text-gray-800 mt-1" id="kpiInput">0</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border-l-4 border-primary shadow-sm">
-                        <span class="text-xs font-bold text-gray-400 uppercase">Blocos Criados</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase">Blocos (Lotes)</span>
                         <div class="text-2xl font-bold text-primary mt-1" id="kpiBlocks">0</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border-l-4 border-success shadow-sm">
@@ -185,29 +185,19 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[sheetName];
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-                    // Leitura Específica
                     let parsedData = [];
                     if(type === 'details') {
-                        // Começa da linha 2 (K2, E2, Q2). Em índice, linha 2 é "1" se base 0?
-                        // Vamos usar "range" para garantir.
-                        // K é coluna 10. E é 4. Q é 16.
-                        // SheetJS range: { s: {r:1, c:0}, e: ... } -> s=Start, r=Row (0-based)
-                        // Linha 2 do Excel = Row Index 1.
+                        // K2, E2, Q2 -> Header na linha 1 (row 0), dados na linha 2 (row 1)
                         const range = XLSX.utils.decode_range(sheet['!ref']);
-                        range.s.r = 1; // Pula a linha 1 (cabeçalho)
-                        
-                        // Lê tudo como array de arrays
-                        const opts = { header: 1, range: range, defval: "" };
-                        parsedData = XLSX.utils.sheet_to_json(sheet, opts);
+                        range.s.r = 1; // Começa da linha 2
+                        parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: "" });
                     } else {
-                        // Totais: Começa da linha 4 (A4, I4). Row Index 3.
+                        // Totais: A4, I4 -> Dados na linha 4 (row 3)
                         const range = XLSX.utils.decode_range(sheet['!ref']);
-                        range.s.r = 3; // Pula linhas 1, 2, 3
-                        const opts = { header: 1, range: range, defval: "" };
-                        parsedData = XLSX.utils.sheet_to_json(sheet, opts);
+                        range.s.r = 3; // Começa da linha 4
+                        parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: "" });
                     }
 
                     if (type === 'details') {
@@ -231,11 +221,8 @@
         function updateCardStatus(type, name, count) {
             const card = document.getElementById(`card${type}`);
             const icon = document.getElementById(`icon${type}`);
-            
             card.classList.add('loaded');
             icon.className = 'fa-solid fa-check-circle upload-icon';
-            // Debug info
-            console.log(`${type} loaded: ${count} rows`);
         }
 
         function checkReady() {
@@ -252,10 +239,8 @@
                 const boxesMap = new Map();
                 const errors = [];
 
-                // A. Detalhes: Box(K=index 10), Setor(E=index 4), Cod(Q=index 16)
-                // Como usamos 'range' começando da linha correta, o array começa do 0 relativo
+                // A. Detalhes (K, E, Q)
                 state.dataDetails.forEach(row => {
-                    // Proteção contra linhas vazias
                     if (!row || row.length < 5) return; 
 
                     const boxIdRaw = row[10]; // K
@@ -273,28 +258,29 @@
                                 documentos: [],
                                 totalPaginas: 0,
                                 setores: new Set(),
-                                codigos: new Set()
+                                codigos: new Set(),
+                                sectorsPerCode: {} // MAPA CRUCIAL PARA A REGRA DE NEGÓCIO
                             });
                         }
                         const box = boxesMap.get(boxId);
                         box.documentos.push({ SETOR: setor, COD: cod });
                         box.setores.add(setor);
                         box.codigos.add(cod);
+
+                        // Pré-processa Setores por Código na caixa
+                        if (!box.sectorsPerCode[cod]) {
+                            box.sectorsPerCode[cod] = new Set();
+                        }
+                        box.sectorsPerCode[cod].add(setor);
                     }
                 });
 
-                if (boxesMap.size === 0) {
-                    alert("Atenção: Nenhuma caixa identificada na coluna K da planilha de detalhes. Verifique se o arquivo está correto.");
-                }
-
-                // B. Totais: Box(A=index 0), Total(I=index 8)
+                // B. Totais (A, I)
                 const totalsMap = new Map();
                 state.dataTotals.forEach(row => {
                     if (!row || row.length < 1) return;
-                    
                     const boxIdRaw = row[0]; // A
                     const totalRaw = row[8]; // I
-
                     if (boxIdRaw) {
                         const id = String(boxIdRaw).trim();
                         const val = parseInt(totalRaw) || 0;
@@ -307,13 +293,10 @@
                 boxesMap.forEach(box => {
                     if (totalsMap.has(box.id)) {
                         box.totalPaginas = totalsMap.get(box.id);
-                        if(box.totalPaginas > 0) {
-                            validBoxes.push(box);
-                        } else {
-                            errors.push({ id: box.id, motivo: "Box encontrado mas com Total = 0" });
-                        }
+                        if(box.totalPaginas > 0) validBoxes.push(box);
+                        else errors.push({ id: box.id, motivo: "Box com Total = 0" });
                     } else {
-                        errors.push({ id: box.id, motivo: "Sem correspondência na planilha de Totais" });
+                        errors.push({ id: box.id, motivo: "Sem correspondência nos Totais" });
                     }
                 });
 
@@ -324,19 +307,17 @@
             }, 100);
         }
 
-        // 3. OTIMIZAÇÃO (SEM LIMITE DE PÁGINAS)
+        // 3. OTIMIZAÇÃO (CORRIGIDA PARA SETORES POR CÓDIGO)
         function optimizeBlocks() {
-            const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 30;
+            const maxBoxes = parseInt(document.getElementById('maxBoxes').value) || 1000;
             const maxCodes = parseInt(document.getElementById('maxCodes').value) || 30;
-            const maxSectors = parseInt(document.getElementById('maxSectors').value) || 12;
+            const maxSectorsPerCode = parseInt(document.getElementById('maxSectors').value) || 12;
 
             let boxesToAllocate = [...state.mergedBoxes];
             const blocks = [];
             const complexList = [];
 
-            // Ordena por Quantidade de Códigos (Complexidade crescente) para tentar agrupar melhor
-            // Ou por Volume decrescente? O usuário pediu apenas restrições de código/setor.
-            // Vamos priorizar encher a caixa.
+            // Ordena por Volume (maiores primeiro) para encher o lote
             boxesToAllocate.sort((a, b) => b.totalPaginas - a.totalPaginas);
 
             let currentBlockId = 1;
@@ -345,7 +326,10 @@
                 let currentBlock = {
                     id: currentBlockId++,
                     boxes: [],
-                    stats: { uniqueCodes: new Set(), uniqueSectors: new Set() }
+                    stats: { 
+                        uniqueCodes: new Set(), 
+                        sectorsByCode: {} // MAPA NOVO: Código -> Set de Setores
+                    }
                 };
 
                 let remainingBoxes = [];
@@ -353,40 +337,28 @@
                 for (let i = 0; i < boxesToAllocate.length; i++) {
                     const box = boxesToAllocate[i];
 
-                    // CHECK CONSTRAINTS
-                    // 1. Max Boxes (Físico)
-                    if (currentBlock.boxes.length >= maxBoxes) {
-                        remainingBoxes.push(box);
-                        continue;
-                    }
-                    
-                    // 2. Max Códigos
-                    let tempCodes = new Set(currentBlock.stats.uniqueCodes);
-                    box.codigos.forEach(c => tempCodes.add(c));
-                    if (tempCodes.size > maxCodes) {
-                        remainingBoxes.push(box);
-                        continue;
-                    }
+                    if (checkConstraints(currentBlock, box, maxBoxes, maxCodes, maxSectorsPerCode)) {
+                        // ADICIONAR
+                        currentBlock.boxes.push(box);
+                        box.codigos.forEach(c => currentBlock.stats.uniqueCodes.add(c));
+                        
+                        // Atualiza mapa de setores por código do bloco
+                        for (let [cod, setoresSet] of Object.entries(box.sectorsPerCode)) {
+                            if (!currentBlock.stats.sectorsByCode[cod]) {
+                                currentBlock.stats.sectorsByCode[cod] = new Set();
+                            }
+                            setoresSet.forEach(s => currentBlock.stats.sectorsByCode[cod].add(s));
+                        }
 
-                    // 3. Max Setores
-                    let tempSectors = new Set(currentBlock.stats.uniqueSectors);
-                    box.setores.forEach(s => tempSectors.add(s));
-                    if (tempSectors.size > maxSectors) {
+                    } else {
                         remainingBoxes.push(box);
-                        continue;
                     }
-
-                    // Approved
-                    currentBlock.boxes.push(box);
-                    box.codigos.forEach(c => currentBlock.stats.uniqueCodes.add(c));
-                    box.setores.forEach(s => currentBlock.stats.uniqueSectors.add(s));
                 }
 
                 if (currentBlock.boxes.length > 0) {
                     blocks.push(currentBlock);
                 } else {
-                    // Loop infinito breaker
-                    remainingBoxes.forEach(b => complexList.push({ id: b.id, motivo: `Sozinha excede: ${b.codigos.size} Cód ou ${b.setores.size} Setores` }));
+                    remainingBoxes.forEach(b => complexList.push({ id: b.id, motivo: "Sozinha excede os limites de Código ou Setor" }));
                     break;
                 }
                 boxesToAllocate = remainingBoxes;
@@ -397,7 +369,33 @@
             renderResults();
         }
 
-        // 4. RENDER
+        function checkConstraints(block, box, maxBoxes, maxCodes, maxSectorsPerCode) {
+            // 1. Limite Caixas (Lote)
+            if (block.boxes.length + 1 > maxBoxes) return false;
+
+            // 2. Limite Códigos (Global)
+            let tempCodes = new Set(block.stats.uniqueCodes);
+            box.codigos.forEach(c => tempCodes.add(c));
+            if (tempCodes.size > maxCodes) return false;
+
+            // 3. Limite Setores POR CÓDIGO (Específico)
+            // Para cada código que essa caixa traz, verificamos se estouraria o limite de setores daquele código
+            for (let [cod, setoresDaCaixa] of Object.entries(box.sectorsPerCode)) {
+                let currentBlockSectors = block.stats.sectorsByCode[cod] || new Set();
+                
+                // Simula união
+                let count = currentBlockSectors.size;
+                for (let s of setoresDaCaixa) {
+                    if (!currentBlockSectors.has(s)) count++;
+                }
+
+                if (count > maxSectorsPerCode) return false;
+            }
+
+            return true;
+        }
+
+        // 4. RENDERIZAÇÃO
         function renderResults() {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('uploadContainer').classList.add('hidden');
@@ -422,14 +420,14 @@
 
             state.finalBlocks.forEach(block => {
                 const pct = Math.round((block.stats.uniqueCodes.size / limitCodes) * 100);
-                const barColor = pct > 100 ? 'bg-red-500' : 'bg-primary';
+                const barColor = pct > 90 ? 'bg-red-500' : 'bg-primary';
 
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in';
                 card.innerHTML = `
                     <div class="bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center">
                         <div>
-                            <h4 class="font-bold text-gray-800 text-lg">Bloco #${block.id}</h4>
+                            <h4 class="font-bold text-gray-800 text-lg">Lote #${block.id}</h4>
                             <span class="text-xs text-gray-500 font-mono">${block.boxes.length} Caixas</span>
                         </div>
                         <div class="text-right w-24">
@@ -437,7 +435,7 @@
                             <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                 <div class="h-full ${barColor}" style="width: ${pct}%"></div>
                             </div>
-                            <span class="text-[9px] text-gray-500 block mt-1">${block.stats.uniqueCodes.size}/${limitCodes} Cód</span>
+                            <span class="text-[9px] text-gray-500 block mt-1">${block.stats.uniqueCodes.size}/${limitCodes} Assuntos</span>
                         </div>
                     </div>
                     <div class="p-4">
@@ -468,7 +466,7 @@
                 b.boxes.forEach(box => {
                     box.documentos.forEach(doc => {
                         data.push({
-                            'Bloco': b.id,
+                            'Lote': b.id,
                             'Box': box.id,
                             'Setor': doc.SETOR,
                             'Código': doc.COD
